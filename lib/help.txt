@@ -1,0 +1,10 @@
+In this folder you will add:
+- BaseMod.jar     (https://github.com/daviscook477/BaseMod/releases)
+- ModTheSpire.jar (https://github.com/kiooeht/ModTheSpire/releases)
+- desktop-1.0.jar (This comes from where SlayTheSpire is installed on your machine)
+
+NOTE: When the game updates make sure to replace the desktop-1.0.jar and check for updates
+      for the other files at the links provided. In case of something changing it is always
+      nice to keep an older version of the desktop-1.0.jar around.
+
+When that is done you can delete this file if you want.
