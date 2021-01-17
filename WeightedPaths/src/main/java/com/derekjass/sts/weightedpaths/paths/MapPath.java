@@ -9,12 +9,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPath> {
 
     private static final Logger logger = LogManager.getLogger(MapPath.class.getName());
+
+    private float value = 0.0f;
 
     public static List<MapPath> generateAll() {
         logger.info("Begin path generation.");
@@ -37,18 +40,25 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             paths.add(path);
         }
         generateAll(paths);
+        logger.info("  Total paths found: " + paths.size());
+        for (MapPath path : paths) {
+            path.valuate();
+        }
+        Collections.sort(paths, Collections.reverseOrder());
+        logger.info("Paths evaluated and sorted.");
         return paths;
     }
 
     public static void generateAll(List<MapPath> paths) {
+        MapRoomNode lastRoom = paths.get(0).peekLast();
+        assert lastRoom != null;
+        if (lastRoom.y == 13) {
+            return;
+        }
         List<MapPath> newPaths = new ArrayList<>();
         for (MapPath path : paths) {
-            MapRoomNode lastRoom = path.peekLast();
+            lastRoom = path.peekLast();
             assert lastRoom != null;
-            if (lastRoom.y == 13) {
-                logger.info("  Total paths found: " + paths.size());
-                return;
-            }
             ArrayList<MapEdge> edges = lastRoom.getEdges();
             if (edges.size() == 1) {
                 MapEdge edge = edges.get(0);
@@ -71,7 +81,9 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         add(room);
     }
 
-    public float getValue() {
+    public void valuate() {
+        // TODO: allow for user customization of weights
+        // TODO: factor estimated gold for store weights
         float summedValue = 0.0f;
         for (MapRoomNode room : this) {
             String roomType = room.getRoomSymbol(true);
@@ -83,11 +95,25 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                 WeightedPaths.roomValues.put(room, summedValue);
             }
         }
-        return summedValue;
+        this.value = summedValue;
     }
 
     @Override
     public int compareTo(MapPath o) {
-        return Float.compare(getValue(), o.getValue());
+        return Float.compare(value, o.value);
+    }
+
+    public void highlightOnMap() {
+
+    }
+
+    @Override
+    public String toString() {
+        String out = "Value: " + value +
+                "\nNodes: ";
+        for (MapRoomNode room : this) {
+            out += room.getRoomSymbol(true) + " ";
+        }
+        return out;
     }
 }
