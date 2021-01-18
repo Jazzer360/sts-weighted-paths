@@ -5,13 +5,13 @@ import com.megacrit.cardcrawl.map.MapRoomNode;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WeightedPaths {
 
     public static List<MapPath> paths;
-
-    public static HashMap<String, Float> weights = new HashMap<>();
-    public static HashMap<MapRoomNode, Float> roomValues = new HashMap<>();
+    public static Map<String, Float> weights = new HashMap<>();
+    public static Map<MapRoomNode, Float> roomValues = new HashMap<>();
 
     static {
         weights.put("M", 1.0f);

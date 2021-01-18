@@ -17,5 +17,6 @@ public class PostNewFloorPatch {
     @SpirePostfixPatch
     public static void onNewFloor(MapRoomNode room) {
         WeightedPaths.paths = MapPath.generateAll();
+        logger.info(WeightedPaths.paths.get(0));
     }
 }

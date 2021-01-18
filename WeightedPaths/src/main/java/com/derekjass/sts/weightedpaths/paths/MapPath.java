@@ -40,11 +40,11 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             paths.add(path);
         }
         generateAll(paths);
-        logger.info("  Total paths found: " + paths.size());
+        logger.info("Total paths found: " + paths.size());
         for (MapPath path : paths) {
             path.valuate();
         }
-        Collections.sort(paths, Collections.reverseOrder());
+        paths.sort(Collections.reverseOrder());
         logger.info("Paths evaluated and sorted.");
         return paths;
     }
@@ -109,11 +109,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     @Override
     public String toString() {
-        String out = "Value: " + value +
-                "\nNodes: ";
+        StringBuilder out = new StringBuilder("Value: " + value + "\nNodes: ");
         for (MapRoomNode room : this) {
-            out += room.getRoomSymbol(true) + " ";
+            out.append(room.getRoomSymbol(true)).append(" ");
         }
-        return out;
+        return out.toString();
     }
 }
