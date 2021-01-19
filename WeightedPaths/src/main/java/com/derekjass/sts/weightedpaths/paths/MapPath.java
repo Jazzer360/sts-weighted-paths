@@ -41,6 +41,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         }
         generateAll(paths);
         logger.info("Total paths found: " + paths.size());
+        WeightedPaths.roomValues.clear();
         for (MapPath path : paths) {
             path.valuate();
         }

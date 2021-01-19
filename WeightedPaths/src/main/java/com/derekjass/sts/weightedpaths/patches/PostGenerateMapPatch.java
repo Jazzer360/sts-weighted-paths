@@ -16,6 +16,6 @@ public class PostGenerateMapPatch {
     @SpirePostfixPatch
     public static void onMapGenerated() {
         WeightedPaths.paths = MapPath.generateAll();
-        logger.info(WeightedPaths.paths.get(0));
+        WeightedPaths.logTopPaths(5, logger);
     }
 }
