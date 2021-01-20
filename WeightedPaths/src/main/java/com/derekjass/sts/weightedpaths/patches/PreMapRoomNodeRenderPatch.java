@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 @SpirePatch(clz = MapRoomNode.class, method="render")
 public class PreMapRoomNodeRenderPatch {
 
-    private static final Logger logger = LogManager.getLogger(PreMapRoomNodeRenderPatch.class.getName());
     private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
 
     @SpirePrefixPatch

@@ -16,6 +16,7 @@ public class WeightedPaths {
     public static Map<String, Float> weights = new HashMap<>();
     public static Map<MapRoomNode, Float> roomValues = new HashMap<>();
 
+    @SuppressWarnings("unused")
     public static void initialize() {
         weights.put("M", 0.0f);
         weights.put("?", 0.0f);
