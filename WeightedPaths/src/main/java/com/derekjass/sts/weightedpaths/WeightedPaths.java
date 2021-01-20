@@ -17,12 +17,12 @@ public class WeightedPaths {
     public static Map<MapRoomNode, Float> roomValues = new HashMap<>();
 
     public static void initialize() {
-        weights.put("M", 1.0f);
-        weights.put("?", 1.0f);
-        weights.put("E", 2.0f);
-        weights.put("R", 2.0f);
+        weights.put("M", 0.0f);
+        weights.put("?", 0.0f);
+        weights.put("E", 1.0f);
+        weights.put("R", 1.0f);
         weights.put("T", 0.0f);
-        weights.put("$", 1.0f);
+        weights.put("$", 0.0f);
     }
 
     public static void logTopPaths(int number, Logger log) {

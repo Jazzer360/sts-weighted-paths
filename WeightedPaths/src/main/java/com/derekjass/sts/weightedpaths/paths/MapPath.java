@@ -22,10 +22,13 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     public static List<MapPath> generateAll() {
         logger.info("Begin path generation.");
         List<MapPath> paths = new ArrayList<>();
-        // TODO: handle boss floors
+        int floorNum = AbstractDungeon.floorNum;
+        logger.debug(floorNum);
+        if (floorNum > 48 || (floorNum - 1) % 17 > 13) {
+            return paths;
+        }
         if (AbstractDungeon.getCurrMapNode() == null) {
             ArrayList<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
-            logger.debug(firstFloor);
             for (MapRoomNode room : firstFloor) {
                 if (!room.hasEdges()) {
                     continue;
@@ -110,9 +113,9 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder("Value: " + value + "\nNodes: ");
+        StringBuilder out = new StringBuilder("Value: " + value + "\nNodes:");
         for (MapRoomNode room : this) {
-            out.append(room.getRoomSymbol(true)).append(" ");
+            out.append(" ").append(room.getRoomSymbol(true));
         }
         return out.toString();
     }
