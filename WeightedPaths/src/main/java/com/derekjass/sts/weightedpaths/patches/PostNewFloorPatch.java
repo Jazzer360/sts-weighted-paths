@@ -1,7 +1,6 @@
 package com.derekjass.sts.weightedpaths.patches;
 
 import com.derekjass.sts.weightedpaths.WeightedPaths;
-import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -16,7 +15,7 @@ public class PostNewFloorPatch {
 
     @SpirePostfixPatch
     public static void onNewFloor(MapRoomNode room) {
-        WeightedPaths.paths = MapPath.generateAll();
+        WeightedPaths.regeneratePaths();
         WeightedPaths.logTopPaths(5, logger);
     }
 }

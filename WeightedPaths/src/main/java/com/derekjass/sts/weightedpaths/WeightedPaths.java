@@ -13,8 +13,8 @@ import java.util.Map;
 public class WeightedPaths {
 
     public static List<MapPath> paths;
-    public static Map<String, Float> weights = new HashMap<>();
-    public static Map<MapRoomNode, Float> roomValues = new HashMap<>();
+    public static final Map<String, Float> weights = new HashMap<>();
+    public static final Map<MapRoomNode, Float> roomValues = new HashMap<>();
 
     @SuppressWarnings("unused")
     public static void initialize() {
@@ -24,6 +24,23 @@ public class WeightedPaths {
         weights.put("R", 1.0f);
         weights.put("T", 0.0f);
         weights.put("$", 0.0f);
+    }
+
+    public static void regeneratePaths() {
+        paths = MapPath.generateAll();
+        refreshPathValues();
+    }
+
+    public static void refreshPathValues() {
+        roomValues.clear();
+        for (MapPath path : paths) {
+            for (MapRoomNode room: path) {
+                Float val = WeightedPaths.roomValues.get(room);
+                if (val == null || val < path.getValue()) {
+                    WeightedPaths.roomValues.put(room, path.getValue());
+                }
+            }
+        }
     }
 
     public static void logTopPaths(int number, Logger log) {
