@@ -20,7 +20,7 @@ public class PreMapRoomNodeRenderPatch {
         }
     }
 
-    public static void drawNodeValue(MapRoomNode room, float value, SpriteBatch sb) {
+    public static void drawNodeValue(MapRoomNode room, double value, SpriteBatch sb) {
         FontHelper.renderFont(sb, FontHelper.tipBodyFont, String.format("%.0f", value),
                 room.hb.cX + 20, room.hb.cY, WEIGHT_COLOR);
     }

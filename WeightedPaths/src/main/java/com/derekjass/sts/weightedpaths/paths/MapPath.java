@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     private static final Logger logger = LogManager.getLogger(MapPath.class.getName());
 
-    private float value = 0.0f;
+    private double value = 0.0f;
 
     public static List<MapPath> generateAll() {
         logger.info("Begin path generation.");
@@ -41,18 +40,12 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             path.add(AbstractDungeon.getCurrMapNode());
             paths.add(path);
         }
-        generateAll(paths);
+        generateRemaining(paths);
         logger.info("Total paths found: " + paths.size());
-        WeightedPaths.roomValues.clear();
-        for (MapPath path : paths) {
-            path.valuate();
-        }
-        paths.sort(Collections.reverseOrder());
-        logger.info("Paths evaluated and sorted.");
         return paths;
     }
 
-    private static void generateAll(List<MapPath> paths) {
+    private static void generateRemaining(List<MapPath> paths) {
         List<MapPath> newPaths = new LinkedList<>();
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
@@ -71,7 +64,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             path.addRoomToPath(edges.get(0));
         }
         paths.addAll(newPaths);
-        generateAll(paths);
+        generateRemaining(paths);
     }
 
     private void addRoomToPath(MapEdge edge) {
@@ -79,24 +72,50 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         add(room);
     }
 
-    private void valuate() {
+    public void valuate() {
         // TODO: allow for user customization of weights
         // TODO: factor estimated gold for store weights
-        float summedValue = 0.0f;
+        double summedValue = 0.0;
+        double estimatedGold = AbstractDungeon.player.gold;
+        boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false;
         for (MapRoomNode room : this) {
+            String roomSymbol = room.getRoomSymbol(true);
+            switch (roomSymbol) {
+                case "M":
+                    estimatedGold += 15.0 * (hasIdol ? 1.25 : 1.0);
+                    summedValue += WeightedPaths.weights.get(roomSymbol);
+                    break;
+                case "?":
+                    estimatedGold += hasFace ? 50.0 : 0.0;
+                    summedValue += WeightedPaths.weights.get(roomSymbol);
+                    break;
+                case "E":
+                    estimatedGold += 30.0 * (hasIdol ? 1.25 : 1.0);
+                    summedValue += WeightedPaths.weights.get(roomSymbol);
+                    break;
+                case "R":
+                    break;
+                case "$":
+                    break;
+            }
             String roomType = room.getRoomSymbol(true);
-            summedValue += WeightedPaths.weights.get(roomType);
+            if (roomType.equals("$")) {
+                summedValue += estimatedGold / 100 * WeightedPaths.weights.get(roomType);
+                estimatedGold = 0.0;
+            } else if (roomType.equals("E")){
+                summedValue += WeightedPaths.weights.get(roomType);
+            }
         }
         this.value = summedValue;
     }
 
-    public float getValue() {
+    public double getValue() {
         return value;
     }
 
     @Override
     public int compareTo(MapPath o) {
-        return Float.compare(value, o.value);
+        return Double.compare(value, o.value);
     }
 
     @Override

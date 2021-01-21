@@ -6,6 +6,7 @@ import com.megacrit.cardcrawl.map.MapRoomNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,17 +17,17 @@ public class WeightedPaths {
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
     public static List<MapPath> paths;
-    public static final Map<String, Float> weights = new HashMap<>();
-    public static final Map<MapRoomNode, Float> roomValues = new HashMap<>();
+    public static final Map<String, Double> weights = new HashMap<>();
+    public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
 
     @SuppressWarnings("unused")
     public static void initialize() {
-        weights.put("M", 0.0f);
-        weights.put("?", 0.0f);
-        weights.put("E", 1.0f);
-        weights.put("R", 1.0f);
-        weights.put("T", 0.0f);
-        weights.put("$", 0.0f);
+        weights.put("M", 0.0);
+        weights.put("?", 0.0);
+        weights.put("E", 1.0);
+        weights.put("R", 1.0);
+        weights.put("T", 0.0);
+        weights.put("$", 0.0);
     }
 
     public static void regeneratePaths() {
@@ -38,13 +39,16 @@ public class WeightedPaths {
     public static void refreshPathValues() {
         roomValues.clear();
         for (MapPath path : paths) {
+            path.valuate();
             for (MapRoomNode room: path) {
-                Float val = WeightedPaths.roomValues.get(room);
+                Double val = WeightedPaths.roomValues.get(room);
                 if (val == null || val < path.getValue()) {
                     WeightedPaths.roomValues.put(room, path.getValue());
                 }
             }
         }
+        paths.sort(Collections.reverseOrder());
+        logger.info("Paths evaluated and sorted.");
     }
 
     public static void logTopPaths(int number) {
