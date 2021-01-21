@@ -5,6 +5,7 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,32 +79,50 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         double summedValue = 0.0;
         double estimatedGold = AbstractDungeon.player.gold;
         boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false;
+        for (AbstractRelic relic : AbstractDungeon.player.relics) {
+            switch (relic.relicId) {
+                case "Golden Idol":
+                    hasIdol = true;
+                    break;
+                case "SsserpentHead":
+                    hasFace = true;
+                    break;
+                case "MawBank":
+                    hasMaw = relic.counter != -2;
+                    break;
+                case "Membership Card":
+                    hasMembership = true;
+                    break;
+                case "The Courier":
+                    hasCourier = true;
+                    break;
+            }
+        }
         for (MapRoomNode room : this) {
             String roomSymbol = room.getRoomSymbol(true);
             switch (roomSymbol) {
                 case "M":
-                    estimatedGold += 15.0 * (hasIdol ? 1.25 : 1.0);
                     summedValue += WeightedPaths.weights.get(roomSymbol);
+                    estimatedGold += 15.0 + (hasIdol ? 3.7 : 0.0) + (hasMaw ? 12.0 : 0.0);
                     break;
                 case "?":
-                    estimatedGold += hasFace ? 50.0 : 0.0;
                     summedValue += WeightedPaths.weights.get(roomSymbol);
+                    estimatedGold += (hasFace ? 50.0 : 0.0) + (hasMaw ? 12.0 : 0.0);
                     break;
                 case "E":
-                    estimatedGold += 30.0 * (hasIdol ? 1.25 : 1.0);
                     summedValue += WeightedPaths.weights.get(roomSymbol);
+                    estimatedGold += 30.0 + (hasIdol ? 7.8 : 0.0) + (hasMaw ? 12.0 : 0.0);
                     break;
                 case "R":
+                    summedValue += WeightedPaths.weights.get(roomSymbol);
+                    estimatedGold += (hasMaw ? 12.0 : 0.0);
                     break;
                 case "$":
+                    summedValue += estimatedGold / 100 / (hasMembership ? 0.5 : 1.0) / (hasCourier ? 0.8 : 1.0)
+                            * WeightedPaths.weights.get(roomSymbol);
+                    estimatedGold = 0.0;
+                    hasMaw = false;
                     break;
-            }
-            String roomType = room.getRoomSymbol(true);
-            if (roomType.equals("$")) {
-                summedValue += estimatedGold / 100 * WeightedPaths.weights.get(roomType);
-                estimatedGold = 0.0;
-            } else if (roomType.equals("E")){
-                summedValue += WeightedPaths.weights.get(roomType);
             }
         }
         this.value = summedValue;
