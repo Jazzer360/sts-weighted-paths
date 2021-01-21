@@ -4,17 +4,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 
 @SpirePatch(clz = MapRoomNode.class, method="render")
-public class PreMapRoomNodeRenderPatch {
+public class PostMapRoomNodeRenderPatch {
 
     private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
 
-    @SpirePrefixPatch
-    public static void onPreMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
+    @SpirePostfixPatch
+    public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
         if (WeightedPaths.roomValues.containsKey(room)) {
             drawNodeValue(room, WeightedPaths.roomValues.get(room), sb);
         }

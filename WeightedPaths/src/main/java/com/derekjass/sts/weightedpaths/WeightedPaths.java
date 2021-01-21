@@ -22,12 +22,12 @@ public class WeightedPaths {
 
     @SuppressWarnings("unused")
     public static void initialize() {
-        weights.put("M", 0.0);
-        weights.put("?", 0.0);
-        weights.put("E", 1.0);
-        weights.put("R", 1.0);
+        weights.put("M", 1.5);
+        weights.put("?", 1.5);
+        weights.put("E", 3.0);
+        weights.put("R", 3.0);
         weights.put("T", 0.0);
-        weights.put("$", 0.0);
+        weights.put("$", 1.0);
     }
 
     public static void regeneratePaths() {
@@ -37,6 +37,7 @@ public class WeightedPaths {
     }
 
     public static void refreshPathValues() {
+        logger.info("Evaluating paths.");
         roomValues.clear();
         for (MapPath path : paths) {
             path.valuate();
