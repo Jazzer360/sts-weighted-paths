@@ -3,6 +3,7 @@ package com.derekjass.sts.weightedpaths;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
@@ -11,6 +12,8 @@ import java.util.Map;
 
 @SpireInitializer
 public class WeightedPaths {
+
+    private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
     public static List<MapPath> paths;
     public static final Map<String, Float> weights = new HashMap<>();
@@ -29,6 +32,7 @@ public class WeightedPaths {
     public static void regeneratePaths() {
         paths = MapPath.generateAll();
         refreshPathValues();
+        logTopPaths(5);
     }
 
     public static void refreshPathValues() {
@@ -43,9 +47,9 @@ public class WeightedPaths {
         }
     }
 
-    public static void logTopPaths(int number, Logger log) {
+    public static void logTopPaths(int number) {
         for (int i = 0; i < Math.min(number, WeightedPaths.paths.size()); i++) {
-            log.info(WeightedPaths.paths.get(i));
+            logger.info(WeightedPaths.paths.get(i));
         }
     }
 }
