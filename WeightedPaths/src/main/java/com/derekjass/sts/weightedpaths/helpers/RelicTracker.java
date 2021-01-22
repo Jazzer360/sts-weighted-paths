@@ -14,6 +14,9 @@ import org.apache.logging.log4j.Logger;
 @SpireInitializer
 public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber {
 
+    //TODO: account for relic swapping with N'loth's Gift
+    //TODO: Ectoplasm
+
     @SpirePatch(clz = MawBank.class, method = "setCounter")
     public static class MawTracker {
 

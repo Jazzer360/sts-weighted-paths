@@ -36,6 +36,10 @@ public class WeightedPaths {
     }
 
     public static void refreshPathValues() {
+        if (paths.size() == 0) {
+            logger.info("No paths to evaluate.");
+            return;
+        }
         logger.info("Evaluating paths.");
         roomValues.clear();
         for (MapPath path : paths) {

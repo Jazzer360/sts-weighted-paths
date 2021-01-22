@@ -19,27 +19,46 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     private double value = 0.0f;
 
+    private static List<MapPath> generateStarterPaths() {
+        List<MapPath> paths = new LinkedList<>();
+        List<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
+        for (MapRoomNode room : firstFloor) {
+            if (!room.hasEdges()) {
+                continue;
+            }
+            MapPath path = new MapPath();
+            path.add(room);
+            paths.add(path);
+        }
+        return paths;
+    }
+
     public static List<MapPath> generateAll() {
         logger.info("Begin path generation.");
-        List<MapPath> paths = new ArrayList<>();
+        List<MapPath> paths = new LinkedList<>();
         int floorNum = AbstractDungeon.floorNum;
-        if (floorNum > 48 || (floorNum - 1) % 17 > 13) {
-            return paths;
-        }
-        if (AbstractDungeon.getCurrMapNode() == null) {
-            ArrayList<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
-            for (MapRoomNode room : firstFloor) {
-                if (!room.hasEdges()) {
-                    continue;
+        if (floorNum % 17 <= 13 && floorNum <= 47) {
+            logger.info("Floor eligible for generation.");
+            if (floorNum % 17 > 0) {
+                logger.info("Generate from current map node.");
+                if (AbstractDungeon.getCurrMapNode() == null) {
+                    return paths;
                 }
-                MapPath path = new MapPath();
-                path.add(room);
-                paths.add(path);
+                for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
+                    MapPath path = new MapPath();
+                    path.addRoomToPath(edge);
+                    paths.add(path);
+                }
+            } else if (!AbstractDungeon.firstRoomChosen) {
+                logger.info("Act is fresh, so generate starter paths.");
+                paths = generateStarterPaths();
+            } else {
+                logger.info("In end rooms of act, so generation halted.");
+                return paths;
             }
         } else {
-            MapPath path = new MapPath();
-            path.add(AbstractDungeon.getCurrMapNode());
-            paths.add(path);
+            logger.info("Floor is not eligible for path generation.");
+            return paths;
         }
         generateRemaining(paths);
         logger.info("Total paths found: " + paths.size());
@@ -75,6 +94,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     public void valuate() {
         // TODO: allow for user customization of weights
+        // TODO: Ectoplasm
         double summedValue = 0.0;
         double estimatedGold = AbstractDungeon.player.gold;
         boolean hasMaw = RelicTracker.hasMaw;
