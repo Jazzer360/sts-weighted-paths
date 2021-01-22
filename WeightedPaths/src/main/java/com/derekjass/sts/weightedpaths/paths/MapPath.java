@@ -1,11 +1,11 @@
 package com.derekjass.sts.weightedpaths.paths;
 
 import com.derekjass.sts.weightedpaths.WeightedPaths;
+import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
-import com.megacrit.cardcrawl.relics.AbstractRelic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,48 +77,29 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         // TODO: allow for user customization of weights
         double summedValue = 0.0;
         double estimatedGold = AbstractDungeon.player.gold;
-        boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false;
-        for (AbstractRelic relic : AbstractDungeon.player.relics) {
-            switch (relic.relicId) {
-                case "Golden Idol":
-                    hasIdol = true;
-                    break;
-                case "SsserpentHead":
-                    hasFace = true;
-                    break;
-                case "MawBank":
-                    hasMaw = relic.counter != -2;
-                    break;
-                case "Membership Card":
-                    hasMembership = true;
-                    break;
-                case "The Courier":
-                    hasCourier = true;
-                    break;
-            }
-        }
+        boolean hasMaw = RelicTracker.hasMaw;
         for (MapRoomNode room : this) {
             String roomSymbol = room.getRoomSymbol(true);
+            estimatedGold += (hasMaw ? 12.0 : 0.0);
             switch (roomSymbol) {
                 case "M":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    estimatedGold += 15.0 + (hasIdol ? 3.7 : 0.0) + (hasMaw ? 12.0 : 0.0);
+                    estimatedGold += 15.0 + (RelicTracker.hasIdol ? 3.7 : 0.0);
                     break;
                 case "?":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    estimatedGold += (hasFace ? 50.0 : 0.0) + (hasMaw ? 12.0 : 0.0);
+                    estimatedGold += (RelicTracker.hasFace ? 50.0 : 0.0);
                     break;
                 case "E":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    estimatedGold += 30.0 + (hasIdol ? 7.8 : 0.0) + (hasMaw ? 12.0 : 0.0);
+                    estimatedGold += 30.0 + (RelicTracker.hasIdol ? 7.8 : 0.0);
                     break;
                 case "R":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    estimatedGold += (hasMaw ? 12.0 : 0.0);
                     break;
                 case "$":
-                    summedValue += estimatedGold / 100 / (hasMembership ? 0.5 : 1.0) / (hasCourier ? 0.8 : 1.0)
-                            * WeightedPaths.weights.get(roomSymbol);
+                    summedValue += estimatedGold / 100 / (RelicTracker.hasMembership ? 0.5 : 1.0)
+                            / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;
                     hasMaw = false;
                     break;

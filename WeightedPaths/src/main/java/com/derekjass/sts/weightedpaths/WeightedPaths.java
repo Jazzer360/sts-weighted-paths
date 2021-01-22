@@ -20,7 +20,6 @@ public class WeightedPaths {
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
 
-    @SuppressWarnings("unused")
     public static void initialize() {
         weights.put("M", 1.5);
         weights.put("?", 1.5);
