@@ -75,7 +75,6 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     public void valuate() {
         // TODO: allow for user customization of weights
-        // TODO: factor estimated gold for store weights
         double summedValue = 0.0;
         double estimatedGold = AbstractDungeon.player.gold;
         boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false;
