@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber {
 
     //TODO: account for relic swapping with N'loth's Gift
-    //TODO: Ectoplasm
 
     @SpirePatch(clz = MawBank.class, method = "setCounter")
     public static class MawTracker {
@@ -31,7 +30,8 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
     private static final Logger logger = LogManager.getLogger(RelicTracker.class.getName());
 
-    public static boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false;
+    public static boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false,
+            hasEcto = false;
 
     private RelicTracker() {
         BaseMod.subscribe(this);
@@ -63,6 +63,10 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
                 logger.info("Courier tracked.");
                 hasCourier = true;
                 break;
+            case "Ectoplasm":
+                logger.info("Ectoplasm tracked.");
+                hasEcto = true;
+                break;
         }
     }
 
@@ -73,7 +77,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
     @Override
     public void receivePreStartGame() {
-        hasIdol = hasFace = hasMaw = hasMembership = hasCourier = false;
+        hasIdol = hasFace = hasMaw = hasMembership = hasCourier = hasEcto = false;
         logger.info("Cleared tracked relics.");
     }
 }
