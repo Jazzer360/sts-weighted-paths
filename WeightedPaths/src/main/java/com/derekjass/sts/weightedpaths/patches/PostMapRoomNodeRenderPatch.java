@@ -45,6 +45,6 @@ public class PostMapRoomNodeRenderPatch {
 
     public static void drawNodeValue(MapRoomNode room, double value, SpriteBatch sb) {
         FontHelper.renderFont(sb, font, String.format("%.1f", value),
-                room.hb.cX + 20, room.hb.cY, WEIGHT_COLOR);
+                room.hb.cX + 25, room.hb.cY, WEIGHT_COLOR);
     }
 }
