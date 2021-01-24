@@ -99,19 +99,27 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         boolean hasMaw = RelicTracker.hasMaw;
         for (MapRoomNode room : this) {
             String roomSymbol = room.getRoomSymbol(true);
-            if (!RelicTracker.hasEcto) estimatedGold += (hasMaw ? 12.0 : 0.0);
+            if (!RelicTracker.hasEcto) {
+                estimatedGold += (hasMaw ? 12.0 : 0.0);
+            }
             switch (roomSymbol) {
                 case "M":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    if (!RelicTracker.hasEcto) estimatedGold += 15.0 + (RelicTracker.hasIdol ? 3.7 : 0.0);
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += 15.0 + (RelicTracker.hasIdol ? 3.7 : 0.0);
+                    }
                     break;
                 case "?":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    if (!RelicTracker.hasEcto) estimatedGold += (RelicTracker.hasFace ? 50.0 : 0.0);
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += (RelicTracker.hasFace ? 50.0 : 0.0);
+                    }
                     break;
                 case "E":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
-                    if (!RelicTracker.hasEcto) estimatedGold += 30.0 + (RelicTracker.hasIdol ? 7.8 : 0.0);
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += 30.0 + (RelicTracker.hasIdol ? 7.8 : 0.0);
+                    }
                     break;
                 case "R":
                     summedValue += WeightedPaths.weights.get(roomSymbol);

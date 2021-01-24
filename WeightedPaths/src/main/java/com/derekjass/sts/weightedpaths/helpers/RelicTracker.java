@@ -3,9 +3,12 @@ package com.derekjass.sts.weightedpaths.helpers;
 import basemod.BaseMod;
 import basemod.interfaces.PreStartGameSubscriber;
 import basemod.interfaces.RelicGetSubscriber;
+import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.MawBank;
 import org.apache.logging.log4j.LogManager;
@@ -13,8 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 @SpireInitializer
 public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber {
-
-    //TODO: account for relic swapping with N'loth's Gift
 
     @SpirePatch(clz = MawBank.class, method = "setCounter")
     public static class MawTracker {
@@ -25,6 +26,15 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
                 hasMaw = false;
                 logger.info("Disabled maw bank.");
             }
+        }
+    }
+
+    @SpirePatch(clz = AbstractPlayer.class, method = "loseRelic")
+    public static class PostLoseRelicPatch {
+
+        @SpirePostfixPatch
+        public static void onLoseRelic(AbstractPlayer instance, String id) {
+            updateRelics(id, false);
         }
     }
 
@@ -41,38 +51,41 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
         new RelicTracker();
     }
 
-    public static void updateRelics(AbstractRelic relic) {
-        switch (relic.relicId) {
+    public static boolean updateRelics(String relicId, boolean add) {
+        switch (relicId) {
             case "Golden Idol":
-                logger.info("Golden Idol tracked.");
-                hasIdol = true;
-                break;
+                logger.info(String.format("Has Golden Idol %b.", add));
+                hasIdol = add;
+                return true;
             case "SsserpentHead":
-                logger.info("Ssserpent Head tracked.");
-                hasFace = true;
-                break;
+                logger.info(String.format("Has Ssserpent Head %b.", add));
+                hasFace = add;
+                return true;
             case "MawBank":
-                logger.info("Maw Bank tracked.");
-                hasMaw = true;
-                break;
+                logger.info(String.format("Has Maw Bank %b.", add));
+                hasMaw = add;
+                return true;
             case "Membership Card":
-                logger.info("Membership Card tracked.");
-                hasMembership = true;
-                break;
+                logger.info(String.format("Has Membership Card %b.", add));
+                hasMembership = add;
+                return true;
             case "The Courier":
-                logger.info("Courier tracked.");
-                hasCourier = true;
-                break;
+                logger.info(String.format("Has Courier %b.", add));
+                hasCourier = add;
+                return true;
             case "Ectoplasm":
-                logger.info("Ectoplasm tracked.");
-                hasEcto = true;
-                break;
+                logger.info(String.format("Has Ectoplasm %b.", add));
+                hasEcto = add;
+                return true;
         }
+        return false;
     }
 
     @Override
     public void receiveRelicGet(AbstractRelic relic) {
-        updateRelics(relic);
+        if (updateRelics(relic.relicId, true)) {
+            WeightedPaths.regeneratePaths();
+        }
     }
 
     @Override

@@ -14,21 +14,6 @@ import javassist.CtBehavior;
 @SpirePatch(clz = MapRoomNode.class, method = "render")
 public class PostMapRoomNodeRenderPatch {
 
-    private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
-    private static BitmapFont font;
-
-    @SpirePostfixPatch
-    public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
-        if (WeightedPaths.roomValues.containsKey(room)) {
-            drawNodeValue(room, WeightedPaths.roomValues.get(room), sb);
-        }
-    }
-
-    public static void drawNodeValue(MapRoomNode room, double value, SpriteBatch sb) {
-        FontHelper.renderFont(sb, font, String.format("%.0f", value),
-                room.hb.cX + 20, room.hb.cY, WEIGHT_COLOR);
-    }
-
     @SpirePatch(clz = FontHelper.class, method = "initialize")
     public static class OnTipBodyFontCreationPatch {
 
@@ -45,5 +30,21 @@ public class PostMapRoomNodeRenderPatch {
                 return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
             }
         }
+    }
+
+    private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
+
+    private static BitmapFont font;
+
+    @SpirePostfixPatch
+    public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
+        if (WeightedPaths.roomValues.containsKey(room)) {
+            drawNodeValue(room, WeightedPaths.roomValues.get(room), sb);
+        }
+    }
+
+    public static void drawNodeValue(MapRoomNode room, double value, SpriteBatch sb) {
+        FontHelper.renderFont(sb, font, String.format("%.1f", value),
+                room.hb.cX + 20, room.hb.cY, WEIGHT_COLOR);
     }
 }
