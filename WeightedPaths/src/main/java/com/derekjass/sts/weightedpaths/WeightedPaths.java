@@ -1,5 +1,8 @@
 package com.derekjass.sts.weightedpaths;
 
+import basemod.BaseMod;
+import basemod.interfaces.PostInitializeSubscriber;
+import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.map.MapRoomNode;
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @SpireInitializer
-public class WeightedPaths {
+public class WeightedPaths implements PostInitializeSubscriber {
 
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
@@ -20,7 +23,12 @@ public class WeightedPaths {
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
 
+    private WeightedPaths() {
+        BaseMod.subscribe(this);
+    }
+
     public static void initialize() {
+        new WeightedPaths();
         weights.put("M", 1.5);
         weights.put("?", 1.5);
         weights.put("E", 3.0);
@@ -59,5 +67,10 @@ public class WeightedPaths {
         for (int i = 0; i < Math.min(number, WeightedPaths.paths.size()); i++) {
             logger.info(WeightedPaths.paths.get(i));
         }
+    }
+
+    @Override
+    public void receivePostInitialize() {
+        WeightsMenu.initialize();
     }
 }
