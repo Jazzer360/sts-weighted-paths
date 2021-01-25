@@ -1,20 +1,30 @@
 package com.derekjass.sts.weightedpaths.menu;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.derekjass.sts.weightedpaths.ui.ClickableUIElement;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class WeightSelector extends ClickableUIElement {
 
-    private static final Logger logger = LogManager.getLogger(WeightSelector.class.getName());
+    private final boolean increase;
+    private final String nodeType;
 
-    public WeightSelector(Texture texture, float x, float y) {
+    WeightSelector(Texture texture, float x, float y, String nodeType, boolean increase) {
         super(texture, x, y);
+        this.increase = increase;
+        this.nodeType = nodeType;
     }
 
     @Override
     protected void onClick() {
-        logger.info("CLICKED!");
+        double inc = isShiftPressed() ? 1.0 : 0.1;
+        WeightedPaths.weights.put(nodeType, WeightedPaths.weights.get(nodeType) + (increase ? inc : -inc));
+        WeightedPaths.refreshPathValues();
+    }
+
+    public static boolean isShiftPressed() {
+        return Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
     }
 }
