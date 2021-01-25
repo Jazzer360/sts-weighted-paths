@@ -2,6 +2,7 @@ package com.derekjass.sts.weightedpaths;
 
 import basemod.BaseMod;
 import basemod.interfaces.PostInitializeSubscriber;
+import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
@@ -19,7 +20,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
 
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
-    public static List<MapPath> paths;
+    private static List<MapPath> paths;
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
 
@@ -29,18 +30,12 @@ public class WeightedPaths implements PostInitializeSubscriber {
 
     public static void initialize() {
         new WeightedPaths();
-        weights.put("M", 1.5);
-        weights.put("?", 1.5);
-        weights.put("E", 3.0);
-        weights.put("R", 3.0);
-        weights.put("T", 0.0);
-        weights.put("$", 1.0);
     }
 
     public static void regeneratePaths() {
         paths = MapPath.generateAll();
         refreshPathValues();
-        logTopPaths(5);
+        logTopPaths();
     }
 
     public static void refreshPathValues() {
@@ -63,14 +58,21 @@ public class WeightedPaths implements PostInitializeSubscriber {
         logger.info("Paths evaluated and sorted.");
     }
 
-    public static void logTopPaths(int number) {
-        for (int i = 0; i < Math.min(number, WeightedPaths.paths.size()); i++) {
+    private static void logTopPaths() {
+        for (int i = 0; i < Math.min(5, WeightedPaths.paths.size()); i++) {
             logger.info(WeightedPaths.paths.get(i));
         }
     }
 
     @Override
     public void receivePostInitialize() {
+        weights.put("M", 1.5);
+        weights.put("?", 1.5);
+        weights.put("E", 3.0);
+        weights.put("R", 3.0);
+        weights.put("T", 0.0);
+        weights.put("$", 1.0);
+        RelicTracker.initialize();
         WeightsMenu.initialize();
     }
 }

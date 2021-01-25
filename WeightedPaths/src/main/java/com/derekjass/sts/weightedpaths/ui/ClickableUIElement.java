@@ -3,8 +3,9 @@ package com.derekjass.sts.weightedpaths.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.helpers.Hitbox;
+import com.megacrit.cardcrawl.helpers.HitboxListener;
 
-public abstract class ClickableUIElement {
+public abstract class ClickableUIElement implements HitboxListener {
 
     private final Hitbox hb;
     private final Texture texture;
@@ -14,7 +15,6 @@ public abstract class ClickableUIElement {
         this.texture = texture;
         this.x = x;
         this.y = y;
-        System.out.println("\n\n\n" + texture.getWidth() + " " + texture.getHeight());
         hb = new Hitbox(x, y, texture.getWidth(), texture.getHeight());
     }
 
@@ -26,9 +26,17 @@ public abstract class ClickableUIElement {
     }
 
     public void update() {
-        hb.update();
-        if (hb.clicked) {
-            onClick();
-        }
+        hb.encapsulatedUpdate(this);
+    }
+
+    @Override
+    public void hoverStarted(Hitbox hb) {}
+
+    @Override
+    public void startClicking(Hitbox hb) {}
+
+    @Override
+    public void clicked(Hitbox hb) {
+        onClick();
     }
 }

@@ -4,7 +4,6 @@ import basemod.BaseMod;
 import basemod.interfaces.PreStartGameSubscriber;
 import basemod.interfaces.RelicGetSubscriber;
 import com.derekjass.sts.weightedpaths.WeightedPaths;
-import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
@@ -14,7 +13,6 @@ import com.megacrit.cardcrawl.relics.MawBank;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SpireInitializer
 public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber {
 
     @SpirePatch(clz = MawBank.class, method = "setCounter")
@@ -34,7 +32,9 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
         @SpirePostfixPatch
         public static void onLoseRelic(AbstractPlayer instance, String id) {
-            updateRelics(id, false);
+            if (updateRelics(id, false)) {
+                WeightedPaths.refreshPathValues();
+            }
         }
     }
 
@@ -51,7 +51,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
         new RelicTracker();
     }
 
-    public static boolean updateRelics(String relicId, boolean add) {
+    private static boolean updateRelics(String relicId, boolean add) {
         switch (relicId) {
             case "Golden Idol":
                 logger.info(String.format("Has Golden Idol %b.", add));
@@ -84,7 +84,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
     @Override
     public void receiveRelicGet(AbstractRelic relic) {
         if (updateRelics(relic.relicId, true)) {
-            WeightedPaths.regeneratePaths();
+            WeightedPaths.refreshPathValues();
         }
     }
 
