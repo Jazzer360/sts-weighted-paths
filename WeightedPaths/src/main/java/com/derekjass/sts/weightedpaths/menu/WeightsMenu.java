@@ -29,33 +29,24 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
     private WeightsMenu() {
         BaseMod.subscribe(this);
         float rowY = menuY;
-        float leftX = menuX;
+        createWidgetRow(rowY, "Store (per 100g):", "$");
+        rowY += ySpacing;
+        createWidgetRow(rowY, "Rest:", "R");
+        rowY += ySpacing;
+        createWidgetRow(rowY, "Unknown:", "?");
+        rowY += ySpacing;
+        createWidgetRow(rowY, "Monsters:", "M");
+        rowY += ySpacing;
+        createWidgetRow(rowY, "Elites:", "E");
+    }
+
+    private void createWidgetRow(float y, String label, String nodeType) {
         float weightX = menuX + LEFT_ARROW.getWidth() + ((arrowXSpacing - LEFT_ARROW.getWidth()) / 2);
         float rightX = menuX + arrowXSpacing;
-        renderables.add(new LabelText(leftX, rowY, "Store (per 100g):"));
-        renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "$", false));
-        renderables.add(new WeightText(weightX, rowY, "$"));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, rowY, "$", true));
-        rowY += ySpacing;
-        renderables.add(new LabelText(leftX, rowY, "Rest:"));
-        renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "R", false));
-        renderables.add(new WeightText(weightX, rowY, "R"));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, rowY, "R", true));
-        rowY += ySpacing;
-        renderables.add(new LabelText(leftX, rowY, "Unknown:"));
-        renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "?", false));
-        renderables.add(new WeightText(weightX, rowY, "?"));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, rowY, "?", true));
-        rowY += ySpacing;
-        renderables.add(new LabelText(leftX, rowY, "Monsters:"));
-        renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "M", false));
-        renderables.add(new WeightText(weightX, rowY, "M"));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, rowY, "M", true));
-        rowY += ySpacing;
-        renderables.add(new LabelText(leftX, rowY, "Elites:"));
-        renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "E", false));
-        renderables.add(new WeightText(weightX, rowY, "E"));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, rowY, "E", true));
+        renderables.add(new LabelText(menuX, y, label));
+        renderables.add(new WeightSelector(LEFT_ARROW, menuX, y, nodeType, false));
+        renderables.add(new WeightText(weightX, y, nodeType));
+        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, y, nodeType, true));
     }
 
     public static void initialize() {
