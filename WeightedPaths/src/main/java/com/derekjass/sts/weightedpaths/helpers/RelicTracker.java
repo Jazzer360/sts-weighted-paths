@@ -19,10 +19,9 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
     public static class PreMawSetCounterPatch {
 
         @SpirePrefixPatch
-        public static void onBreak(MawBank instance, int counter) {
+        public static void onMawSetCounter(MawBank instance, int counter) {
             if (counter == -2) {
-                hasMaw = false;
-                logger.info("Disabled maw bank.");
+                updateRelicsAndRefreshPathValues("MawBank", false);
             }
         }
     }
@@ -32,9 +31,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
         @SpirePostfixPatch
         public static void onLoseRelic(AbstractPlayer instance, String id) {
-            if (updateRelics(id, false)) {
-                WeightedPaths.refreshPathValues();
-            }
+            updateRelicsAndRefreshPathValues(id, false);
         }
     }
 
@@ -81,11 +78,15 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
         return false;
     }
 
-    @Override
-    public void receiveRelicGet(AbstractRelic relic) {
-        if (updateRelics(relic.relicId, true)) {
+    private static void updateRelicsAndRefreshPathValues(String relicId, boolean add) {
+        if (updateRelics(relicId, add)) {
             WeightedPaths.refreshPathValues();
         }
+    }
+
+    @Override
+    public void receiveRelicGet(AbstractRelic relic) {
+        updateRelicsAndRefreshPathValues(relic.relicId, true);
     }
 
     @Override

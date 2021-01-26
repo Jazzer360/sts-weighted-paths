@@ -27,7 +27,7 @@ public class WeightRenderPatches {
     public static class PostMapRoomNodeRenderPatch {
 
         @SpirePostfixPatch
-        public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
+        public static void onMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
             drawNodeValue(room, sb);
         }
     }
@@ -36,7 +36,7 @@ public class WeightRenderPatches {
     public static class PreTipBodyFontCreationPatch {
 
         @SpireInsertPatch(locator = Locator.class)
-        public static void postFontCreation() {
+        public static void onFontCreation() {
             font = FontHelper.prepFont(18.0f, false);
         }
 
