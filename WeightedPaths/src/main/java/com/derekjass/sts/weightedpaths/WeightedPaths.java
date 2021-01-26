@@ -39,7 +39,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void refreshPathValues() {
-        if (paths.size() == 0) {
+        if (paths == null || paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;
         }
