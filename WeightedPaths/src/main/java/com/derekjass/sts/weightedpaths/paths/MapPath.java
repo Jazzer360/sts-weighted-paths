@@ -93,7 +93,6 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     }
 
     public void valuate() {
-        // TODO: allow for user customization of weights
         double summedValue = 0.0;
         double estimatedGold = AbstractDungeon.player.gold;
         boolean hasMaw = RelicTracker.hasMaw;

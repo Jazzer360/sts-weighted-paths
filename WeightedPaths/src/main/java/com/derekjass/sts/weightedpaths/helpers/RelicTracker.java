@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber {
 
     @SpirePatch(clz = MawBank.class, method = "setCounter")
-    public static class MawTracker {
+    public static class PreMawSetCounterPatch {
 
         @SpirePrefixPatch
         public static void onBreak(MawBank instance, int counter) {

@@ -11,11 +11,29 @@ import com.megacrit.cardcrawl.map.MapRoomNode;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
-@SpirePatch(clz = MapRoomNode.class, method = "render")
-public class PostMapRoomNodeRenderPatch {
+public class WeightRenderPatches {
+
+    private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
+    private static BitmapFont font;
+
+    private static void drawNodeValue(MapRoomNode room, SpriteBatch sb) {
+        if (WeightedPaths.roomValues.containsKey(room)) {
+            double value = WeightedPaths.roomValues.get(room);
+            FontHelper.renderFont(sb, font, String.format("%.1f", value), room.hb.cX + 25, room.hb.cY, WEIGHT_COLOR);
+        }
+    }
+
+    @SpirePatch(clz = MapRoomNode.class, method = "render")
+    public static class PostMapRoomNodeRenderPatch {
+
+        @SpirePostfixPatch
+        public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
+            drawNodeValue(room, sb);
+        }
+    }
 
     @SpirePatch(clz = FontHelper.class, method = "initialize")
-    public static class OnTipBodyFontCreationPatch {
+    public static class PreTipBodyFontCreationPatch {
 
         @SpireInsertPatch(locator = Locator.class)
         public static void postFontCreation() {
@@ -30,21 +48,5 @@ public class PostMapRoomNodeRenderPatch {
                 return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
             }
         }
-    }
-
-    private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
-
-    private static BitmapFont font;
-
-    @SpirePostfixPatch
-    public static void onPostMapRoomNodeRender(MapRoomNode room, SpriteBatch sb) {
-        if (WeightedPaths.roomValues.containsKey(room)) {
-            drawNodeValue(room, WeightedPaths.roomValues.get(room), sb);
-        }
-    }
-
-    private static void drawNodeValue(MapRoomNode room, double value, SpriteBatch sb) {
-        FontHelper.renderFont(sb, font, String.format("%.1f", value),
-                room.hb.cX + 25, room.hb.cY, WEIGHT_COLOR);
     }
 }
