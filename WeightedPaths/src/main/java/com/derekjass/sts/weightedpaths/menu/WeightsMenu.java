@@ -22,6 +22,7 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
     private static final float menuX = Legend.X + 75.0f;
     private static final float menuY = 45.0f;
     private static final float ySpacing = 45.0f;
+    private static final float arrowXSpacing = 74.0f;
 
     private final List<Renderable> renderables = new LinkedList<>();
 
@@ -29,8 +30,8 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
         BaseMod.subscribe(this);
         float rowY = menuY;
         float leftX = menuX;
-        float weightX = menuX + 60;
-        float rightX = menuX + 74;
+        float weightX = menuX + LEFT_ARROW.getWidth() + ((arrowXSpacing - LEFT_ARROW.getWidth()) / 2);
+        float rightX = menuX + arrowXSpacing;
         renderables.add(new LabelText(leftX, rowY, "Store (per 100g):"));
         renderables.add(new WeightSelector(LEFT_ARROW, leftX, rowY, "$", false));
         renderables.add(new WeightText(weightX, rowY, "$"));
