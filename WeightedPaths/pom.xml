@@ -6,7 +6,7 @@
     <!-- Change These to match your mod -->
     <groupId>com.derekjass.sts</groupId>
     <artifactId>weighted-paths</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Weighted Paths</name>
     <description>Shows value of map nodes based on weight of paths.</description>
