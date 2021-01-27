@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.derekjass.sts.weightedpaths.Config;
 import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
@@ -24,10 +25,12 @@ public class WeightRenderPatches {
     private static void drawNodeValue(MapRoomNode room, SpriteBatch sb) {
         if (WeightedPaths.roomValues.containsKey(room)) {
             double value = WeightedPaths.roomValues.get(room);
-            double greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
-            Color c = getColor(greenAmt);
-            sb.setColor(c);
-            sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
+            if (Config.useColoredWeights()) {
+                double greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
+                Color c = getColor(greenAmt);
+                sb.setColor(c);
+                sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
+            }
             FontHelper.renderFontCentered(
                     sb, font, String.format("%.1f", value),
                     room.hb.cX + DELTA_X + TEX_W / 2.0f, room.hb.cY, WEIGHT_COLOR);

@@ -78,5 +78,6 @@ public class WeightedPaths implements PostInitializeSubscriber {
         weights.put("$", 1.0);
         RelicTracker.initialize();
         WeightsMenu.initialize();
+        Config.initialize();
     }
 }
