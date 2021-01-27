@@ -26,10 +26,13 @@ public class WeightRenderPatches {
         if (WeightedPaths.roomValues.containsKey(room)) {
             double value = WeightedPaths.roomValues.get(room);
             if (Config.useColoredWeights()) {
-                double greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
-                Color c = getColor(greenAmt);
-                sb.setColor(c);
-                sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
+                if (!(WeightedPaths.maxValue - WeightedPaths.minValue < 0.01)) {
+                    double greenAmt = (value - WeightedPaths.minValue) /
+                            (WeightedPaths.maxValue - WeightedPaths.minValue);
+                    Color c = getColor(greenAmt);
+                    sb.setColor(c);
+                    sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
+                }
             }
             FontHelper.renderFontCentered(
                     sb, font, String.format("%.1f", value),
