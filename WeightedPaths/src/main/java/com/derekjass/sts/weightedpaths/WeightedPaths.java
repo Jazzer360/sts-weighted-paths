@@ -23,6 +23,8 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static List<MapPath> paths;
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
+    public static double maxValue;
+    public static double minValue;
 
     private WeightedPaths() {
         BaseMod.subscribe(this);
@@ -54,6 +56,8 @@ public class WeightedPaths implements PostInitializeSubscriber {
                 }
             }
         }
+        maxValue = Collections.max(roomValues.values());
+        minValue = Collections.min(roomValues.values());
         paths.sort(Collections.reverseOrder());
         logger.info("Paths evaluated and sorted.");
     }
