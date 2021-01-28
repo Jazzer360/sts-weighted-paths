@@ -41,12 +41,12 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void refreshPathValues() {
+        roomValues.clear();
         if (paths == null || paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;
         }
         logger.info("Evaluating paths.");
-        roomValues.clear();
         for (MapPath path : paths) {
             path.valuate();
             for (MapRoomNode room: path) {
