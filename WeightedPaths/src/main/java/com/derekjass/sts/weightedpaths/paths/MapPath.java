@@ -70,10 +70,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
             assert lastRoom != null;
-            if (lastRoom.y == 13) {
+            ArrayList<MapEdge> edges = lastRoom.getEdges();
+            if (lastRoom.y == 13 || edges.isEmpty()) {
                 return;
             }
-            ArrayList<MapEdge> edges = lastRoom.getEdges();
             if (edges.size() > 1) {
                 for (int i = 1; i < edges.size(); i++) {
                     MapPath newPath = (MapPath) path.clone();
