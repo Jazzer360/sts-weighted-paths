@@ -37,6 +37,11 @@ public class WeightRenderPatches {
             FontHelper.renderFontCentered(
                     sb, font, String.format("%.1f", value),
                     room.hb.cX + DELTA_X + TEX_W / 2.0f, room.hb.cY, WEIGHT_COLOR);
+            if (WeightedPaths.storeGold.containsKey(room)) {
+                FontHelper.renderFontCentered(
+                        sb, font, String.format("%.0fg", WeightedPaths.storeGold.get(room)),
+                        room.hb.cX + DELTA_X + TEX_W / 2.0f, room.hb.cY - 28.0f, WEIGHT_COLOR);
+            }
         }
     }
 

@@ -23,6 +23,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static List<MapPath> paths;
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
+    public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
     public static double maxValue;
     public static double minValue;
 
@@ -42,6 +43,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
 
     public static void refreshPathValues() {
         roomValues.clear();
+        storeGold.clear();
         if (paths == null || paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;

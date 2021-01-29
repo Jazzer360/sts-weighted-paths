@@ -124,6 +124,11 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     break;
                 case "$":
+                    if (WeightedPaths.storeGold.containsKey(room)) {
+                        WeightedPaths.storeGold.put(room, Math.max(estimatedGold, WeightedPaths.storeGold.get(room)));
+                    } else {
+                        WeightedPaths.storeGold.put(room, estimatedGold);
+                    }
                     summedValue += estimatedGold / 100 / (RelicTracker.hasMembership ? 0.5 : 1.0)
                             / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;
