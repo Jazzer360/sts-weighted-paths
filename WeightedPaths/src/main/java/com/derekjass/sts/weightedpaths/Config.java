@@ -25,6 +25,7 @@ public class Config {
         defaults.setProperty(FORCE_EMERALD_KEY, "false");
         try {
             config = new SpireConfig("WeightedPaths", "config", defaults);
+            config.save();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,6 +40,7 @@ public class Config {
                 (button) -> {
                     useColoredWeights = button.enabled;
                     config.setBool(COLORED_WEIGHTS_KEY, button.enabled);
+                    saveConfig();
                 });
         panel.addUIElement(toggleColor);
         ModLabeledToggleButton toggleEmerald = new ModLabeledToggleButton(
@@ -49,6 +51,7 @@ public class Config {
                 (button) -> {
                     forceEmerald = button.enabled;
                     config.setBool(FORCE_EMERALD_KEY, button.enabled);
+                    saveConfig();
                 });
         panel.addUIElement(toggleEmerald);
         BaseMod.registerModBadge(new Texture("badge.png"),
@@ -63,5 +66,13 @@ public class Config {
 
     public static boolean forceEmerald() {
         return forceEmerald;
+    }
+
+    private static void saveConfig() {
+        try {
+            config.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
