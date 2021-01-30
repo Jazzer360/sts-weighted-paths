@@ -143,6 +143,15 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         return value;
     }
 
+    public boolean hasEmerald() {
+        for (MapRoomNode room : this) {
+            if (room.hasEmeraldKey) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public int compareTo(MapPath o) {
         return Double.compare(value, o.value);

@@ -6,6 +6,8 @@ import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpireInitializer
 public class WeightedPaths implements PostInitializeSubscriber {
@@ -49,6 +52,9 @@ public class WeightedPaths implements PostInitializeSubscriber {
             return;
         }
         logger.info("Evaluating paths.");
+        if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3) {
+            paths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
+        }
         for (MapPath path : paths) {
             path.valuate();
             for (MapRoomNode room: path) {
