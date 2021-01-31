@@ -6,27 +6,12 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 
+@SpirePatch(clz = AbstractDungeon.class, method = "setCurrMapNode")
+@SpirePatch(clz = AbstractDungeon.class, method = "generateMap")
 public class PathingChangedPatches {
 
-    @SpirePatch(clz = AbstractDungeon.class, method = "generateMap")
-    public static class PostGenerateMapPatch {
-
-        @SpirePostfixPatch
-        public static void onMapGenerated() {
-            onPathingChanged();
-        }
-    }
-
-    @SpirePatch(clz = AbstractDungeon.class, method = "setCurrMapNode")
-    public static class PostNewFloorPatch {
-
-        @SpirePostfixPatch
-        public static void onNewFloor(MapRoomNode room) {
-            onPathingChanged();
-        }
-    }
-
-    private static void onPathingChanged() {
+    @SpirePostfixPatch
+    public static void onMapGenerated() {
         WeightedPaths.regeneratePaths();
     }
 }

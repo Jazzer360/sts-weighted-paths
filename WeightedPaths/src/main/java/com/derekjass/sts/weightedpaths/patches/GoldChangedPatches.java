@@ -5,27 +5,12 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
+@SpirePatch(clz = AbstractPlayer.class, method = "gainGold")
+@SpirePatch(clz = AbstractPlayer.class, method = "loseGold")
 public class GoldChangedPatches {
 
-    @SpirePatch(clz = AbstractPlayer.class, method = "gainGold")
-    public static class PostGoldGainedPatch {
-
-        @SpirePostfixPatch
-        public static void onGainGold(AbstractPlayer instance, int amount) {
-            onGoldChanged();
-        }
-    }
-
-    @SpirePatch(clz = AbstractPlayer.class, method = "loseGold")
-    public static class PostGoldLostPatch {
-
-        @SpirePostfixPatch
-        public static void onLostGold(AbstractPlayer instance, int amount) {
-            onGoldChanged();
-        }
-    }
-
-    private static void onGoldChanged() {
+    @SpirePostfixPatch
+    public static void onGainGold(AbstractPlayer instance, int amount) {
         WeightedPaths.refreshPathValues();
     }
 }
