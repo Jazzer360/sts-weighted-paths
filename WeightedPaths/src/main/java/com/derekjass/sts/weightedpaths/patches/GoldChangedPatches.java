@@ -10,9 +10,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 public class GoldChangedPatches {
 
     @SpirePostfixPatch
-    public static void onGainGold(AbstractPlayer instance, int amount) {
+    public static void onGainGold() {
         WeightedPaths.refreshPathValues();
     }
 }
-
-
