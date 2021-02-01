@@ -70,10 +70,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
             assert lastRoom != null;
-            if (lastRoom.y == 13) {
+            ArrayList<MapEdge> edges = lastRoom.getEdges();
+            if (lastRoom.y == 13 || edges.isEmpty()) {
                 return;
             }
-            ArrayList<MapEdge> edges = lastRoom.getEdges();
             if (edges.size() > 1) {
                 for (int i = 1; i < edges.size(); i++) {
                     MapPath newPath = (MapPath) path.clone();
@@ -124,6 +124,11 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     break;
                 case "$":
+                    if (WeightedPaths.storeGold.containsKey(room)) {
+                        WeightedPaths.storeGold.put(room, Math.max(estimatedGold, WeightedPaths.storeGold.get(room)));
+                    } else {
+                        WeightedPaths.storeGold.put(room, estimatedGold);
+                    }
                     summedValue += estimatedGold / 100 / (RelicTracker.hasMembership ? 0.5 : 1.0)
                             / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;
@@ -136,6 +141,15 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     public double getValue() {
         return value;
+    }
+
+    public boolean hasEmerald() {
+        for (MapRoomNode room : this) {
+            if (room.hasEmeraldKey) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

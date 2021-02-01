@@ -6,6 +6,8 @@ import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpireInitializer
 public class WeightedPaths implements PostInitializeSubscriber {
@@ -23,6 +26,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static List<MapPath> paths;
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
+    public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
     public static double maxValue;
     public static double minValue;
 
@@ -41,12 +45,20 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void refreshPathValues() {
+        roomValues.clear();
+        storeGold.clear();
         if (paths == null || paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;
         }
         logger.info("Evaluating paths.");
-        roomValues.clear();
+        if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3) {
+            List<MapPath> filterPaths;
+            if (AbstractDungeon.getCurrMapNode() != null && !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
+                filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
+                paths = filterPaths.isEmpty() ? paths : filterPaths;
+            }
+        }
         for (MapPath path : paths) {
             path.valuate();
             for (MapRoomNode room: path) {

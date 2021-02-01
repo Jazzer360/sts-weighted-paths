@@ -26,17 +26,22 @@ public class WeightRenderPatches {
         if (WeightedPaths.roomValues.containsKey(room)) {
             double value = WeightedPaths.roomValues.get(room);
             if (Config.useColoredWeights()) {
+                double greenAmt = 1.0;
                 if (!(WeightedPaths.maxValue - WeightedPaths.minValue < 0.01)) {
-                    double greenAmt = (value - WeightedPaths.minValue) /
-                            (WeightedPaths.maxValue - WeightedPaths.minValue);
-                    Color c = getColor(greenAmt);
-                    sb.setColor(c);
-                    sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
+                    greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
                 }
+                Color c = getColor(greenAmt);
+                sb.setColor(c);
+                sb.draw(BG_TEX, room.hb.cX + DELTA_X, room.hb.cY - TEX_H / 2.0f);
             }
             FontHelper.renderFontCentered(
                     sb, font, String.format("%.1f", value),
                     room.hb.cX + DELTA_X + TEX_W / 2.0f, room.hb.cY, WEIGHT_COLOR);
+            if (WeightedPaths.storeGold.containsKey(room)) {
+                FontHelper.renderFontCentered(
+                        sb, font, String.format("%.0fg", WeightedPaths.storeGold.get(room)),
+                        room.hb.cX + DELTA_X + TEX_W / 2.0f, room.hb.cY - 28.0f, WEIGHT_COLOR);
+            }
         }
     }
 
