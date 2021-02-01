@@ -53,9 +53,10 @@ public class WeightedPaths implements PostInitializeSubscriber {
         }
         logger.info("Evaluating paths.");
         if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3) {
+            List<MapPath> filterPaths;
             if (AbstractDungeon.getCurrMapNode() != null && !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
-                paths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
-                assert !paths.isEmpty();
+                filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
+                paths = filterPaths.isEmpty() ? paths : filterPaths;
             }
         }
         for (MapPath path : paths) {
