@@ -35,11 +35,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     public static List<MapPath> generateAll() {
         logger.info("Begin path generation.");
-        List<MapPath> paths = new LinkedList<>();
-        int floorNum = AbstractDungeon.floorNum;
-        if (floorNum % 17 <= 13 && floorNum <= 47) {
+        List<MapPath> paths = new ArrayList<>();
+        if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
             logger.info("Floor eligible for generation.");
-            if (floorNum % 17 > 0) {
+            if (AbstractDungeon.floorNum % 17 > 0) {
                 logger.info("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
                     return paths;
@@ -69,19 +68,15 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         List<MapPath> newPaths = new LinkedList<>();
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
-            assert lastRoom != null;
-            ArrayList<MapEdge> edges = lastRoom.getEdges();
-            if (lastRoom.y == 13 || edges.isEmpty()) {
+            if (lastRoom == null || lastRoom.y == 13 || lastRoom.getEdges().isEmpty()) {
                 return;
             }
-            if (edges.size() > 1) {
-                for (int i = 1; i < edges.size(); i++) {
-                    MapPath newPath = (MapPath) path.clone();
-                    newPath.addRoomToPath(edges.get(i));
-                    newPaths.add(newPath);
-                }
+            for (int i = 1; i < lastRoom.getEdges().size(); i++) {
+                MapPath newPath = (MapPath) path.clone();
+                newPath.addRoomToPath(lastRoom.getEdges().get(i));
+                newPaths.add(newPath);
             }
-            path.addRoomToPath(edges.get(0));
+            path.addRoomToPath(lastRoom.getEdges().get(0));
         }
         paths.addAll(newPaths);
         generateRemaining(paths);
