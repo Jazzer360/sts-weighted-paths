@@ -15,6 +15,11 @@
          Try to keep the version numbers the same as from their GitHub.  -->
     <dependencies>
         <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.megacrit.cardcrawl</groupId>
             <artifactId>slaythespire</artifactId>
             <version>017</version>
@@ -34,11 +39,6 @@
             <version>2.14.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/../lib/BaseMod.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.rollbar</groupId>
-            <version>[1.0,)</version>
-            <artifactId>rollbar-java</artifactId>
         </dependency>
     </dependencies>
 
@@ -65,6 +65,12 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.sentry</pattern>
+                                    <shadedPattern>com.derekjass.io.sentry</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <filters>
                                 <filter>
                                     <!-- Change this to match your mods groupId:artifactId -->

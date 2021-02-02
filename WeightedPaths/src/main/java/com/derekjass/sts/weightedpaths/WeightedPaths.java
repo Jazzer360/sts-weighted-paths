@@ -10,8 +10,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
-import com.rollbar.notifier.Rollbar;
-import com.rollbar.notifier.config.ConfigBuilder;
+import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 public class WeightedPaths implements PostInitializeSubscriber {
 
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
-    private static Rollbar rollbar;
 
     private static List<MapPath> paths = new ArrayList<>();
     public static final Map<String, Double> weights = new HashMap<>();
@@ -47,7 +45,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
         try {
             paths = MapPath.generateAll();
         } catch (UnexpectedStateException e) {
-            rollbar.warning(e);
+            Sentry.captureException(e);
             paths = new ArrayList<>();
         }
         refreshPathValues();
@@ -63,7 +61,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
         }
         logger.info("Evaluating paths.");
         if (AbstractDungeon.getCurrMapNode() == null) {
-            rollbar.warning("During path evaluation, current map node was null.");
+            Sentry.captureMessage("During path evaluation, current map node was null.");
         } else if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3 &&
                 !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
             List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
@@ -99,13 +97,14 @@ public class WeightedPaths implements PostInitializeSubscriber {
         weights.put("$", 1.0);
     }
 
-    private static void initializeRollbar() {
-        rollbar = Rollbar.init(ConfigBuilder.withAccessToken("aea8b93405404bd388d4e2e711236255").build());
+    private static void initializeSentry() {
+        Sentry.init(options -> options.setDsn(
+                "https://194ec40bfa894d95ae51a7b0c1839d41@o514923.ingest.sentry.io/5618892"));
     }
 
     @Override
     public void receivePostInitialize() {
-        initializeRollbar();
+        initializeSentry();
         initializeWeights();
         RelicTracker.initialize();
         WeightsMenu.initialize();
