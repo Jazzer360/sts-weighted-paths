@@ -41,7 +41,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             if (AbstractDungeon.floorNum % 17 > 0) {
                 logger.info("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
-                    throw new UnexpectedStateException();
+                    throw new UnexpectedStateException("Current map node was null when generating paths from floor.");
                 }
                 for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
                     MapPath path = new MapPath();
@@ -64,12 +64,16 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         return paths;
     }
 
-    private static void generateRemaining(List<MapPath> paths) {
+    private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
         List<MapPath> newPaths = new LinkedList<>();
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
-            if (lastRoom == null || lastRoom.y == 13 || lastRoom.getEdges().isEmpty()) {
+            if (lastRoom == null) {
+                throw new UnexpectedStateException("During path generation, last node in path returned null.");
+            } else if (lastRoom.y == 13) {
                 return;
+            } else if (lastRoom.getEdges().isEmpty()) {
+                throw new UnexpectedStateException("Encountered a room without edges");
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
