@@ -15,6 +15,7 @@ import com.rollbar.notifier.config.ConfigBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +48,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
             paths = MapPath.generateAll();
         } catch (UnexpectedStateException e) {
             rollbar.warning(e);
-        } finally {
-            paths = null;
+            paths = new ArrayList<>();
         }
         refreshPathValues();
         logTopPaths();
@@ -104,18 +104,9 @@ public class WeightedPaths implements PostInitializeSubscriber {
     @Override
     public void receivePostInitialize() {
         initializeRollbar();
-        testRollbar();
         initializeWeights();
         RelicTracker.initialize();
         WeightsMenu.initialize();
         Config.initialize();
-    }
-
-    private static void testRollbar() {
-        try {
-            throw new Exception();
-        } catch (Exception e) {
-            rollbar.warning(e);
-        }
     }
 }
