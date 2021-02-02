@@ -33,7 +33,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         return paths;
     }
 
-    public static List<MapPath> generateAll() {
+    public static List<MapPath> generateAll() throws UnexpectedStateException {
         logger.info("Begin path generation.");
         List<MapPath> paths = new ArrayList<>();
         if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
@@ -41,7 +41,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             if (AbstractDungeon.floorNum % 17 > 0) {
                 logger.info("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
-                    return paths;
+                    throw new UnexpectedStateException();
                 }
                 for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
                     MapPath path = new MapPath();

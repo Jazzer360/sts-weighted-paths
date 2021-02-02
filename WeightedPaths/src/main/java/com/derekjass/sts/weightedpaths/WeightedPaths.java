@@ -5,10 +5,13 @@ import basemod.interfaces.PostInitializeSubscriber;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
+import com.derekjass.sts.weightedpaths.paths.UnexpectedStateException;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import io.sentry.Sentry;
+import io.sentry.SentryClientFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +42,13 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void regeneratePaths() {
-        paths = MapPath.generateAll();
+        try {
+            paths = MapPath.generateAll();
+        } catch (UnexpectedStateException e) {
+            Sentry.capture(e);
+        } finally {
+            paths = null;
+        }
         refreshPathValues();
         logTopPaths();
     }
@@ -78,16 +87,80 @@ public class WeightedPaths implements PostInitializeSubscriber {
         }
     }
 
-    @Override
-    public void receivePostInitialize() {
+    public void initializeWeights() {
         weights.put("M", 1.5);
         weights.put("?", 1.5);
         weights.put("E", 3.0);
         weights.put("R", 3.0);
         weights.put("T", 0.0);
         weights.put("$", 1.0);
+    }
+
+    private static void initializeSentry() {
+        Sentry.init((SentryClientFactory) options -> {
+            // NOTE: Replace the test DSN below with YOUR OWN DSN to see the events from this app in
+            // your Sentry project/dashboard
+            options.setDsn("https://f7f320d5c3a54709be7b28e0f2ca7081@sentry.io/1808954");
+
+            // All events get assigned to the release. See more at
+            // https://docs.sentry.io/workflow/releases/
+            options.setRelease("io.sentry.samples.console@4.0.0+1");
+
+            // Modifications to event before it goes out. Could replace the event altogether
+            options.setBeforeSend(
+                    (event, hint) -> {
+                        // Drop an event altogether:
+                        if (event.getTag("SomeTag") != null) {
+                            return null;
+                        }
+                        return event;
+                    });
+
+            // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
+            options.setBeforeBreadcrumb(
+                    (breadcrumb, hint) -> {
+                        // Don't add breadcrumbs with message containing:
+                        if (breadcrumb.getMessage() != null
+                                && breadcrumb.getMessage().contains("bad breadcrumb")) {
+                            return null;
+                        }
+                        return breadcrumb;
+                    });
+
+            // Configure the background worker which sends events to sentry:
+            // Wait up to 5 seconds before shutdown while there are events to send.
+            options.setShutdownTimeout(5000);
+
+            // Enable SDK logging with Debug level
+            options.setDebug(true);
+            // To change the verbosity, use:
+            // By default it's DEBUG.
+            options.setDiagnosticLevel(
+                    SentryLevel
+                            .ERROR); //  A good option to have SDK debug log in prod is to use only level
+            // ERROR here.
+
+            // Exclude frames from some packages from being "inApp" so are hidden by default in Sentry
+            // UI:
+            options.addInAppExclude("org.jboss");
+        });
+    }
+
+    @Override
+    public void receivePostInitialize() {
+        initializeSentry();
+        try {
+            testSentry();
+        } catch (Exception e) {
+            Sentry.capture(e);
+        }
+        initializeWeights();
         RelicTracker.initialize();
         WeightsMenu.initialize();
         Config.initialize();
+    }
+
+    private static void testSentry() throws Exception {
+        throw new Exception();
     }
 }

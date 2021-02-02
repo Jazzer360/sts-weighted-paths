@@ -1,0 +1,5 @@
+package com.derekjass.sts.weightedpaths.paths;
+
+public class UnexpectedStateException extends Exception {
+
+}
