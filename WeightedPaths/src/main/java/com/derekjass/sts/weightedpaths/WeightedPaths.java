@@ -28,7 +28,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
     private static Rollbar rollbar;
 
-    private static List<MapPath> paths;
+    private static List<MapPath> paths = new ArrayList<>();
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
     public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
@@ -57,13 +57,15 @@ public class WeightedPaths implements PostInitializeSubscriber {
     public static void refreshPathValues() {
         roomValues.clear();
         storeGold.clear();
-        if (paths == null || paths.size() == 0) {
+        if (paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;
         }
         logger.info("Evaluating paths.");
-        if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3 &&
-                AbstractDungeon.getCurrMapNode() != null && !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
+        if (AbstractDungeon.getCurrMapNode() == null) {
+            rollbar.warning("During path evaluation, current map node was null.");
+        } else if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3 &&
+                !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
             List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
             paths = filterPaths.isEmpty() ? paths : filterPaths;
         }
