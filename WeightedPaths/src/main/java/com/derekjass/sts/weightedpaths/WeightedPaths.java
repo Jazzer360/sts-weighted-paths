@@ -98,8 +98,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     private static void initializeSentry() {
-        Sentry.init(options -> options.setDsn(
-                "https://194ec40bfa894d95ae51a7b0c1839d41@o514923.ingest.sentry.io/5618892"));
+        Sentry.init(options -> options.setEnableExternalConfiguration(true));
     }
 
     @Override
