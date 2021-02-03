@@ -6,6 +6,7 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import io.sentry.Breadcrumb;
 import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     }
 
     public static List<MapPath> generateAll() throws UnexpectedStateException {
+        addSentryBreadcrumb();
         logger.info("Begin path generation.");
         List<MapPath> paths = new ArrayList<>();
         if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
@@ -64,6 +66,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         }
         generateRemaining(paths);
         logger.info("Total paths found: " + paths.size());
+        Sentry.clearBreadcrumbs();
         return paths;
     }
 
@@ -72,7 +75,6 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
             if (lastRoom == null) {
-                addSentryBreadcrumb();
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
             } else if (lastRoom.y == 13) {
                 return;
@@ -91,10 +93,12 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     }
 
     private static void addSentryBreadcrumb() {
-        int floor = AbstractDungeon.floorNum;
-        int act = AbstractDungeon.actNum;
-        MapRoomNode room = AbstractDungeon.getCurrMapNode();
-        Sentry.addBreadcrumb(String.format("Floor: %d, Act: %d, CurrRoom: %s", floor, act, room));
+        Breadcrumb crumb = new Breadcrumb();
+        crumb.setCategory("map-generation");
+        crumb.setData("floor", AbstractDungeon.floorNum);
+        crumb.setData("act", AbstractDungeon.actNum);
+        crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ? "NULL" : AbstractDungeon.getCurrMapNode());
+        Sentry.addBreadcrumb(crumb);
     }
 
     private void addRoomToPath(MapEdge edge) {
@@ -169,7 +173,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder("\nValue: " + value + "\nNodes:");
+        StringBuilder out = new StringBuilder("Value: " + value + ", Nodes:");
         for (MapRoomNode room : this) {
             out.append(" ").append(room.getRoomSymbol(true));
         }
