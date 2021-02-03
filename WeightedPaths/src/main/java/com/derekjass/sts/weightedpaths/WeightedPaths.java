@@ -60,12 +60,13 @@ public class WeightedPaths implements PostInitializeSubscriber {
             return;
         }
         logger.info("Evaluating paths.");
-        if (AbstractDungeon.getCurrMapNode() == null) {
-            Sentry.captureMessage("During path evaluation, current map node was null.");
-        } else if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3 &&
-                !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
-            List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
-            paths = filterPaths.isEmpty() ? paths : filterPaths;
+        if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3) {
+            if (AbstractDungeon.getCurrMapNode() == null) {
+                Sentry.captureMessage("In act 3 and current map node is null.");
+            } else if (!AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
+                List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
+                paths = filterPaths.isEmpty() ? paths : filterPaths;
+            }
         }
         for (MapPath path : paths) {
             path.valuate();
