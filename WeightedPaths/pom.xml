@@ -6,7 +6,7 @@
     <!-- Change These to match your mod -->
     <groupId>com.derekjass.sts</groupId>
     <artifactId>weighted-paths</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
     <name>Weighted Paths</name>
     <description>Shows value of map nodes based on weight of paths.</description>
@@ -14,6 +14,11 @@
     <!-- These are the dependencies that were placed in the libs folder.
          Try to keep the version numbers the same as from their GitHub.  -->
     <dependencies>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry</artifactId>
+            <version>4.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.megacrit.cardcrawl</groupId>
             <artifactId>slaythespire</artifactId>
@@ -35,7 +40,6 @@
             <scope>system</scope>
             <systemPath>${basedir}/../lib/BaseMod.jar</systemPath>
         </dependency>
-
     </dependencies>
 
     <properties>
@@ -61,6 +65,12 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.sentry</pattern>
+                                    <shadedPattern>com.derekjass.io.sentry</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <filters>
                                 <filter>
                                     <!-- Change this to match your mods groupId:artifactId -->

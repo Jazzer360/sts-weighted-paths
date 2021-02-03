@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths.menu;
+package com.derekjass.sts.weightedpaths.ui.menu;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.derekjass.sts.weightedpaths.WeightedPaths;

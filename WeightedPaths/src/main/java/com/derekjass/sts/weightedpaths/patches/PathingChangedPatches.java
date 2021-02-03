@@ -13,4 +13,5 @@ public class PathingChangedPatches {
     public static void onMapGenerated() {
         WeightedPaths.regeneratePaths();
     }
+
 }

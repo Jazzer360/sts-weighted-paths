@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths.menu;
+package com.derekjass.sts.weightedpaths.ui.menu;
 
 import basemod.BaseMod;
 import basemod.interfaces.PostUpdateSubscriber;
@@ -42,11 +42,10 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
 
     private void createWidgetRow(float y, String label, String nodeType) {
         float weightX = menuX + LEFT_ARROW.getWidth() + ((arrowXSpacing - LEFT_ARROW.getWidth()) / 2);
-        float rightX = menuX + arrowXSpacing;
         renderables.add(new LabelText(menuX, y, label));
         renderables.add(new WeightSelector(LEFT_ARROW, menuX, y, nodeType, false));
         renderables.add(new WeightText(weightX, y, nodeType));
-        renderables.add(new WeightSelector(RIGHT_ARROW, rightX, y, nodeType, true));
+        renderables.add(new WeightSelector(RIGHT_ARROW, menuX + arrowXSpacing, y, nodeType, true));
     }
 
     public static void initialize() {

@@ -6,6 +6,8 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import io.sentry.Breadcrumb;
+import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,15 +35,17 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         return paths;
     }
 
-    public static List<MapPath> generateAll() {
+    public static List<MapPath> generateAll() throws UnexpectedStateException {
+        addSentryBreadcrumb();
         logger.info("Begin path generation.");
-        List<MapPath> paths = new LinkedList<>();
-        int floorNum = AbstractDungeon.floorNum;
-        if (floorNum % 17 <= 13 && floorNum <= 47) {
+        List<MapPath> paths = new ArrayList<>();
+        if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
             logger.info("Floor eligible for generation.");
-            if (floorNum % 17 > 0) {
+            if (AbstractDungeon.floorNum % 17 > 0) {
                 logger.info("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
+                    // Happens when loading into an existing save when generating the map.
+                    logger.info("Halting generation. Current map node is null.");
                     return paths;
                 }
                 for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
@@ -62,29 +66,39 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         }
         generateRemaining(paths);
         logger.info("Total paths found: " + paths.size());
+        Sentry.clearBreadcrumbs();
         return paths;
     }
 
-    private static void generateRemaining(List<MapPath> paths) {
+    private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
         List<MapPath> newPaths = new LinkedList<>();
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
-            assert lastRoom != null;
-            ArrayList<MapEdge> edges = lastRoom.getEdges();
-            if (lastRoom.y == 13 || edges.isEmpty()) {
+            if (lastRoom == null) {
+                throw new UnexpectedStateException("During path generation, last node in path returned null.");
+            } else if (lastRoom.y == 13) {
                 return;
+            } else if (lastRoom.getEdges().isEmpty()) {
+                throw new UnexpectedStateException("Encountered a room without edges");
             }
-            if (edges.size() > 1) {
-                for (int i = 1; i < edges.size(); i++) {
-                    MapPath newPath = (MapPath) path.clone();
-                    newPath.addRoomToPath(edges.get(i));
-                    newPaths.add(newPath);
-                }
+            for (int i = 1; i < lastRoom.getEdges().size(); i++) {
+                MapPath newPath = (MapPath) path.clone();
+                newPath.addRoomToPath(lastRoom.getEdges().get(i));
+                newPaths.add(newPath);
             }
-            path.addRoomToPath(edges.get(0));
+            path.addRoomToPath(lastRoom.getEdges().get(0));
         }
         paths.addAll(newPaths);
         generateRemaining(paths);
+    }
+
+    private static void addSentryBreadcrumb() {
+        Breadcrumb crumb = new Breadcrumb();
+        crumb.setCategory("map-generation");
+        crumb.setData("floor", AbstractDungeon.floorNum);
+        crumb.setData("act", AbstractDungeon.actNum);
+        crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ? "NULL" : AbstractDungeon.getCurrMapNode());
+        Sentry.addBreadcrumb(crumb);
     }
 
     private void addRoomToPath(MapEdge edge) {
@@ -159,7 +173,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder("\nValue: " + value + "\nNodes:");
+        StringBuilder out = new StringBuilder("Value: " + value + ", Nodes:");
         for (MapRoomNode room : this) {
             out.append(" ").append(room.getRoomSymbol(true));
         }

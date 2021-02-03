@@ -3,15 +3,18 @@ package com.derekjass.sts.weightedpaths;
 import basemod.BaseMod;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
-import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
+import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
+import com.derekjass.sts.weightedpaths.paths.UnexpectedStateException;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +26,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
 
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
-    private static List<MapPath> paths;
+    private static List<MapPath> paths = new ArrayList<>();
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
     public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
@@ -39,7 +42,12 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void regeneratePaths() {
-        paths = MapPath.generateAll();
+        try {
+            paths = MapPath.generateAll();
+        } catch (UnexpectedStateException e) {
+            Sentry.captureException(e);
+            paths = new ArrayList<>();
+        }
         refreshPathValues();
         logTopPaths();
     }
@@ -47,15 +55,16 @@ public class WeightedPaths implements PostInitializeSubscriber {
     public static void refreshPathValues() {
         roomValues.clear();
         storeGold.clear();
-        if (paths == null || paths.size() == 0) {
+        if (paths.size() == 0) {
             logger.info("No paths to evaluate.");
             return;
         }
         logger.info("Evaluating paths.");
         if (Config.forceEmerald() && !Settings.hasEmeraldKey && AbstractDungeon.actNum == 3) {
-            List<MapPath> filterPaths;
-            if (AbstractDungeon.getCurrMapNode() != null && !AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
-                filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
+            if (AbstractDungeon.getCurrMapNode() == null) {
+                Sentry.captureMessage("In act 3 and current map node is null.");
+            } else if (!AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
+                List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
                 paths = filterPaths.isEmpty() ? paths : filterPaths;
             }
         }
@@ -80,14 +89,29 @@ public class WeightedPaths implements PostInitializeSubscriber {
         }
     }
 
-    @Override
-    public void receivePostInitialize() {
+    private void initializeWeights() {
         weights.put("M", 1.5);
         weights.put("?", 1.5);
         weights.put("E", 3.0);
         weights.put("R", 3.0);
         weights.put("T", 0.0);
         weights.put("$", 1.0);
+    }
+
+    private static void initializeSentry() {
+        Sentry.init(options -> {
+            options.setEnableExternalConfiguration(true);
+            options.setBeforeSend((event, hint) -> {
+                event.setServerName(null);
+                return event;
+            });
+        });
+    }
+
+    @Override
+    public void receivePostInitialize() {
+        initializeSentry();
+        initializeWeights();
         RelicTracker.initialize();
         WeightsMenu.initialize();
         Config.initialize();

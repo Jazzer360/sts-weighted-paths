@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths.menu;
+package com.derekjass.sts.weightedpaths.ui.menu;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.derekjass.sts.weightedpaths.ui.Renderable;
@@ -9,7 +9,7 @@ public class LabelText implements Renderable {
     private final String label;
     private final float x, y;
 
-    LabelText(float x, float y, String label) {
+    LabelText(@SuppressWarnings("SameParameterValue") float x, float y, String label) {
         this.x = x;
         this.y = y;
         this.label = label;
