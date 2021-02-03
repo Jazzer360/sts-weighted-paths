@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths.menu;
+package com.derekjass.sts.weightedpaths.ui.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

@@ -6,6 +6,7 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +42,9 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             if (AbstractDungeon.floorNum % 17 > 0) {
                 logger.info("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
-                    throw new UnexpectedStateException("Current map node was null when generating paths from floor.");
+                    // Happens when loading into an existing save when generating the map.
+                    logger.info("Halting generation. Current map node is null.");
+                    return paths;
                 }
                 for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
                     MapPath path = new MapPath();
@@ -69,6 +72,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
             if (lastRoom == null) {
+                addSentryBreadcrumb();
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
             } else if (lastRoom.y == 13) {
                 return;
@@ -84,6 +88,13 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         }
         paths.addAll(newPaths);
         generateRemaining(paths);
+    }
+
+    private static void addSentryBreadcrumb() {
+        int floor = AbstractDungeon.floorNum;
+        int act = AbstractDungeon.actNum;
+        MapRoomNode room = AbstractDungeon.getCurrMapNode();
+        Sentry.addBreadcrumb(String.format("Floor: %d, Act: %d, CurrRoom: %s", floor, act, room));
     }
 
     private void addRoomToPath(MapEdge edge) {

@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths.menu;
+package com.derekjass.sts.weightedpaths.ui.menu;
 
 import basemod.BaseMod;
 import basemod.interfaces.PostUpdateSubscriber;

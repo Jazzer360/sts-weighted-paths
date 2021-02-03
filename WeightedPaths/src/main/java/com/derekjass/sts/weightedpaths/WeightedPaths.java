@@ -3,7 +3,7 @@ package com.derekjass.sts.weightedpaths;
 import basemod.BaseMod;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
-import com.derekjass.sts.weightedpaths.menu.WeightsMenu;
+import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.derekjass.sts.weightedpaths.paths.UnexpectedStateException;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
