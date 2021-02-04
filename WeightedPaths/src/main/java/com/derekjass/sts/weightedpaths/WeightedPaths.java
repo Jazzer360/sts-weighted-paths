@@ -101,6 +101,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static void initializeSentry() {
         Sentry.init(options -> {
             options.setEnableExternalConfiguration(true);
+            options.addInAppInclude("com.derekjass.sts.weightedpaths");
             options.setBeforeSend((event, hint) -> {
                 event.setServerName(null);
                 return event;
