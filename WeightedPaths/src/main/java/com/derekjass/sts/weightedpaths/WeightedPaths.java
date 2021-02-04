@@ -89,7 +89,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
         }
     }
 
-    private void initializeWeights() {
+    private static void initializeWeights() {
         weights.put("M", 1.5);
         weights.put("?", 1.5);
         weights.put("E", 3.0);
