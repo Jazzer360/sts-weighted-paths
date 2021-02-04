@@ -3,7 +3,7 @@
   "name": "Weighted Paths",
   "author_list": ["Derek Jass"],
   "description": "Display map node value based on the value of the paths that go through it.",
-  "version": "develop",
+  "version": "0",
   "sts_version": "12-22-2020",
   "mts_version": "2.7.0",
   "dependencies": ["basemod"]
