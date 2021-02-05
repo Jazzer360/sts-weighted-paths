@@ -6,7 +6,7 @@
     <!-- Change These to match your mod -->
     <groupId>com.derekjass.sts</groupId>
     <artifactId>weighted-paths</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <packaging>jar</packaging>
     <name>Weighted Paths</name>
     <description>Shows value of map nodes based on weight of paths.</description>
@@ -69,6 +69,10 @@
                                 <relocation>
                                     <pattern>io.sentry</pattern>
                                     <shadedPattern>com.derekjass.io.sentry</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>com.derekjass.com.google.gson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
