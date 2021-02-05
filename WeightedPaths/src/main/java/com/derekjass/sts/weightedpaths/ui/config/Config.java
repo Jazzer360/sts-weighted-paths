@@ -1,4 +1,4 @@
-package com.derekjass.sts.weightedpaths;
+package com.derekjass.sts.weightedpaths.ui.config;
 
 import basemod.BaseMod;
 import basemod.ModLabeledToggleButton;
@@ -19,7 +19,7 @@ public class Config {
     private static boolean useColoredWeights;
     private static boolean forceEmerald;
 
-    static void initialize() {
+    public static void initialize() {
         Properties defaults = new Properties();
         defaults.setProperty(COLORED_WEIGHTS_KEY, "true");
         defaults.setProperty(FORCE_EMERALD_KEY, "false");

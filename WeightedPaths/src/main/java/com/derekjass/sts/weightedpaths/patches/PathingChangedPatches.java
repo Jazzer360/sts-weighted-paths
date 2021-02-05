@@ -10,7 +10,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 public class PathingChangedPatches {
 
     @SpirePostfixPatch
-    public static void onMapGenerated() {
+    public static void onPathingChanged() {
         WeightedPaths.regeneratePaths();
     }
 
