@@ -3,10 +3,11 @@ package com.derekjass.sts.weightedpaths;
 import basemod.BaseMod;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
-import com.derekjass.sts.weightedpaths.ui.config.Config;
-import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.derekjass.sts.weightedpaths.paths.UnexpectedStateException;
+import com.derekjass.sts.weightedpaths.ui.config.Config;
+import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
+import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -118,6 +120,8 @@ public class WeightedPaths implements PostInitializeSubscriber {
                 return sendToSentry ? event : null;
             });
         });
+        Sentry.setExtra("loaded-mods",
+                Arrays.stream(Loader.MODINFOS).map(modInfo -> modInfo.Name).collect(Collectors.toList()).toString());
     }
 
     @Override

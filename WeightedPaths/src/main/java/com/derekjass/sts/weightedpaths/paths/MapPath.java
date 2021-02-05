@@ -36,17 +36,21 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     }
 
     public static List<MapPath> generateAll() throws UnexpectedStateException {
+        addSentryBreadcrumb("Begin path generation.");
         addSentryBreadcrumb();
-        logger.info("Begin path generation.");
         List<MapPath> paths = new ArrayList<>();
         if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
-            logger.info("Floor eligible for generation.");
+            addSentryBreadcrumb("Floor eligible for generation.");
             if (AbstractDungeon.floorNum % 17 > 0) {
-                logger.info("Generate from current map node.");
+                addSentryBreadcrumb("Generate from current map node.");
                 if (AbstractDungeon.getCurrMapNode() == null) {
                     // Happens when loading into an existing save when generating the map.
-                    logger.info("Halting generation. Current map node is null.");
+                    addSentryBreadcrumb("Halting generation. Current map node is null.");
                     return paths;
+                }
+                if (!AbstractDungeon.getCurrMapNode().hasEdges()) {
+                    logger.error("Current map node had no edges.");
+                    throw new UnexpectedStateException("Current map node had no edges.");
                 }
                 for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
                     MapPath path = new MapPath();
@@ -54,14 +58,14 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                     paths.add(path);
                 }
             } else if (!AbstractDungeon.firstRoomChosen) {
-                logger.info("Act is fresh, so generate starter paths.");
+                addSentryBreadcrumb("Act is fresh, so generate starter paths.");
                 paths = generateStarterPaths();
             } else {
-                logger.info("In end rooms of act, so generation halted.");
+                addSentryBreadcrumb("In end rooms of act, so generation halted.");
                 return paths;
             }
         } else {
-            logger.info("Floor is not eligible for path generation.");
+            addSentryBreadcrumb("Floor is not eligible for path generation.");
             return paths;
         }
         generateRemaining(paths);
@@ -79,7 +83,8 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             } else if (lastRoom.y == 13) {
                 return;
             } else if (lastRoom.getEdges().isEmpty()) {
-                throw new UnexpectedStateException("Encountered a room without edges");
+                logger.error("Encountered a room without edges.");
+                throw new UnexpectedStateException("Encountered a room without edges.");
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
@@ -92,11 +97,19 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         generateRemaining(paths);
     }
 
+    private static void addSentryBreadcrumb(String note) {
+        logger.info(note);
+        Breadcrumb crumb = new Breadcrumb();
+        crumb.setCategory("map-generation");
+        crumb.setMessage(note);
+        Sentry.addBreadcrumb(crumb);
+    }
+
     private static void addSentryBreadcrumb() {
         Breadcrumb crumb = new Breadcrumb();
         crumb.setCategory("map-generation");
-        crumb.setData("floor", AbstractDungeon.floorNum);
-        crumb.setData("act", AbstractDungeon.actNum);
+        crumb.setData("floor", String.valueOf(AbstractDungeon.floorNum));
+        crumb.setData("act", String.valueOf(AbstractDungeon.actNum));
         crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ? "NULL" : AbstractDungeon.getCurrMapNode());
         Sentry.addBreadcrumb(crumb);
     }
