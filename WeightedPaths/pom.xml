@@ -70,6 +70,10 @@
                                     <pattern>io.sentry</pattern>
                                     <shadedPattern>com.derekjass.io.sentry</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>com.derekjass.com.google.gson</shadedPattern>
+                                </relocation>
                             </relocations>
                             <filters>
                                 <filter>
