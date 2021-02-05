@@ -69,8 +69,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             return paths;
         }
         generateRemaining(paths);
-        logger.info("Total paths found: " + paths.size());
-        Sentry.clearBreadcrumbs();
+        addSentryBreadcrumb("Total paths found: " + paths.size());
         return paths;
     }
 
