@@ -3,6 +3,7 @@ package com.derekjass.sts.weightedpaths;
 import basemod.BaseMod;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
+import com.derekjass.sts.weightedpaths.ui.config.Config;
 import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.derekjass.sts.weightedpaths.paths.MapPath;
 import com.derekjass.sts.weightedpaths.paths.UnexpectedStateException;
@@ -104,7 +105,17 @@ public class WeightedPaths implements PostInitializeSubscriber {
             options.addInAppInclude("com.derekjass.sts.weightedpaths");
             options.setBeforeSend((event, hint) -> {
                 event.setServerName(null);
-                return event;
+                boolean sendToSentry = true;
+                if (event.getThrowable() != null) {
+                    sendToSentry = false;
+                    for (StackTraceElement ste : event.getThrowable().getStackTrace()) {
+                        if (ste.getClassName().startsWith("com.derekjass.sts.weightedpaths")) {
+                            sendToSentry = true;
+                            break;
+                        }
+                    }
+                }
+                return sendToSentry ? event : null;
             });
         });
     }
