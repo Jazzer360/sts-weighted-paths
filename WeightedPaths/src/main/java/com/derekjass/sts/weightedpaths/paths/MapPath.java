@@ -3,8 +3,10 @@ package com.derekjass.sts.weightedpaths.paths;
 import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.dungeons.TheEnding;
+import com.megacrit.cardcrawl.helpers.SeedHelper;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import io.sentry.Breadcrumb;
@@ -105,6 +107,8 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         crumb.setData("act", CardCrawlGame.dungeon.getClass().getSimpleName());
         crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ?
                 "NULL" : AbstractDungeon.getCurrMapNode().room.getClass().getSimpleName());
+        crumb.setData("seed", SeedHelper.getString(Settings.seed));
+        crumb.setData("character", AbstractDungeon.player.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
     }
 
