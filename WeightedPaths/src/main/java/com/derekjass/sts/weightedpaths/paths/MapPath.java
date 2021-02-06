@@ -4,6 +4,7 @@ import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.derekjass.sts.weightedpaths.helpers.RelicTracker;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.dungeons.TheEnding;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import io.sentry.Breadcrumb;
@@ -39,30 +40,23 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         addSentryBreadcrumb("Begin path generation.");
         addSentryBreadcrumb();
         List<MapPath> paths = new ArrayList<>();
-        if (AbstractDungeon.floorNum % 17 <= 13 && AbstractDungeon.floorNum <= 47) {
-            addSentryBreadcrumb("Floor eligible for generation.");
-            if (AbstractDungeon.floorNum % 17 > 0) {
-                addSentryBreadcrumb("Generate from current map node.");
-                if (AbstractDungeon.getCurrMapNode() == null) {
-                    // Happens when loading into an existing save when generating the map.
-                    addSentryBreadcrumb("Halting generation. Current map node is null.");
-                    return paths;
-                }
-                if (!AbstractDungeon.getCurrMapNode().hasEdges()) {
-                    logger.error("Current map node had no edges.");
-                    throw new UnexpectedStateException("Current map node had no edges.");
-                }
-                for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
-                    MapPath path = new MapPath();
-                    path.addRoomToPath(edge);
-                    paths.add(path);
-                }
-            } else if (!AbstractDungeon.firstRoomChosen) {
-                addSentryBreadcrumb("Act is fresh, so generate starter paths.");
-                paths = generateStarterPaths();
-            } else {
-                addSentryBreadcrumb("In end rooms of act, so generation halted.");
-                return paths;
+        if (CardCrawlGame.dungeon instanceof TheEnding) {
+            addSentryBreadcrumb("In the ending, so don't generate anything.");
+            return paths;
+        } else if (!AbstractDungeon.firstRoomChosen) {
+            addSentryBreadcrumb("Act is fresh, so generate starter paths.");
+            paths = generateStarterPaths();
+        } else if (AbstractDungeon.getCurrMapNode() == null) {
+            throw new UnexpectedStateException("AbstractDungeon current map node is null.");
+        } else if (AbstractDungeon.getCurrMapNode().y < AbstractDungeon.MAP_HEIGHT - 2) {
+            addSentryBreadcrumb("Generating from current room.");
+            if (!AbstractDungeon.getCurrMapNode().hasEdges()) {
+                throw new UnexpectedStateException("Current map node has no edges.");
+            }
+            for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
+                MapPath path = new MapPath();
+                path.addRoomToPath(edge);
+                paths.add(path);
             }
         } else {
             addSentryBreadcrumb("Floor is not eligible for path generation.");
@@ -108,8 +102,9 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         Breadcrumb crumb = new Breadcrumb();
         crumb.setCategory("map-generation");
         crumb.setData("floor", String.valueOf(AbstractDungeon.floorNum));
-        crumb.setData("act", String.valueOf(AbstractDungeon.actNum));
-        crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ? "NULL" : AbstractDungeon.getCurrMapNode());
+        crumb.setData("act", CardCrawlGame.dungeon.getClass().getSimpleName());
+        crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ?
+                "NULL" : AbstractDungeon.getCurrMapNode().room.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
     }
 
