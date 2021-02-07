@@ -27,7 +27,7 @@ public class WeightRenderPatches {
             double value = WeightedPaths.roomValues.get(room);
             if (Config.useColoredWeights()) {
                 double greenAmt = 1.0;
-                if (!(WeightedPaths.maxValue - WeightedPaths.minValue < 0.01)) {
+                if (WeightedPaths.maxValue - WeightedPaths.minValue > 0.01) {
                     greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
                 }
                 Color c = getColor(greenAmt);
