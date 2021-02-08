@@ -116,13 +116,13 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         Sentry.addBreadcrumb(crumb);
     }
 
-    private static void addSentryBreadcrumb(MapRoomNode room, @SuppressWarnings("SameParameterValue") String note) {
+    private static void addSentryBreadcrumb(MapRoomNode node, @SuppressWarnings("SameParameterValue") String note) {
         Breadcrumb crumb = new Breadcrumb();
         crumb.setCategory("map-generation");
         crumb.setData("note", note);
-        crumb.setData("room-x", room.x);
-        crumb.setData("room-y", room.y);
-        crumb.setData("room", room.room.getClass().getSimpleName());
+        crumb.setData("room-x", node.x);
+        crumb.setData("room-y", node.y);
+        crumb.setData("room", node.room.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
     }
 
