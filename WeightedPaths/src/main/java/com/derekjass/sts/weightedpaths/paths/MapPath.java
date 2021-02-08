@@ -84,6 +84,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                 iter.remove();
                 addSentryBreadcrumb(lastRoom, "Room has no edges.");
                 Sentry.captureMessage("Encountered a room with no edges.");
+                continue;
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
