@@ -122,7 +122,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         crumb.setData("note", note);
         crumb.setData("room-x", room.x);
         crumb.setData("room-y", room.y);
-        crumb.setData("room", room.getClass().getSimpleName());
+        crumb.setData("room", room.room.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
     }
 
