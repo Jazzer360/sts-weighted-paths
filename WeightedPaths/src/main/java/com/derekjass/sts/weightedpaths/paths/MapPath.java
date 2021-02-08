@@ -141,6 +141,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                 estimatedGold += (hasMaw ? 12.0 : 0.0);
             }
             switch (roomSymbol) {
+                case "T":
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += 18.4;
+                    }
                 case "M":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     if (!RelicTracker.hasEcto) {
