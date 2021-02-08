@@ -82,6 +82,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                 return;
             } else if (!lastRoom.hasEdges()) {
                 iter.remove();
+                addSentryBreadcrumb(lastRoom, "Room has no edges.");
                 Sentry.captureMessage("Encountered a room with no edges.");
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
@@ -113,6 +114,15 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         crumb.setData("seed", SeedHelper.getString(Settings.seed));
         crumb.setData("character", AbstractDungeon.player.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
+    }
+
+    private static void addSentryBreadcrumb(MapRoomNode room, String note) {
+        Breadcrumb crumb = new Breadcrumb();
+        crumb.setCategory("map-generation");
+        crumb.setData("note", note);
+        crumb.setData("room-x", room.x);
+        crumb.setData("room-y", room.y);
+        crumb.setData("room", room.getClass().getSimpleName());
     }
 
     private void addRoomToPath(MapEdge edge) {
