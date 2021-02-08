@@ -8,6 +8,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.dungeons.TheEnding;
 import com.megacrit.cardcrawl.helpers.SeedHelper;
 import com.megacrit.cardcrawl.map.MapEdge;
+import com.megacrit.cardcrawl.map.MapGenerator;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import io.sentry.Breadcrumb;
 import io.sentry.Sentry;
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPath> {
 
@@ -66,25 +66,31 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             return paths;
         }
         generateRemaining(paths);
-        addSentryBreadcrumb("Total paths found: " + paths.size());
+        logger.info("Total paths found: " + paths.size());
+        Sentry.clearBreadcrumbs();
         return paths;
     }
 
     private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
         List<MapPath> newPaths = new LinkedList<>();
-        ListIterator<MapPath> iter = paths.listIterator();
-        while (iter.hasNext()) {
-            MapPath path = iter.next();
+        for (MapPath path : paths) {
             MapRoomNode lastRoom = path.peekLast();
             if (lastRoom == null) {
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
             } else if (lastRoom.y == AbstractDungeon.MAP_HEIGHT - 2) {
                 return;
             } else if (!lastRoom.hasEdges()) {
-                iter.remove();
-                addSentryBreadcrumb(lastRoom, "Room has no edges.");
-                Sentry.captureMessage("Encountered a room with no edges.");
-                continue;
+                StringBuilder sb = new StringBuilder();
+                for (List<MapRoomNode> floor : AbstractDungeon.map) {
+                    for (MapRoomNode room : floor) {
+                        sb.append(room.toString());
+                    }
+                    sb.append("\n");
+                }
+                Sentry.addBreadcrumb(sb.toString());
+                Sentry.addBreadcrumb(MapGenerator.toString(AbstractDungeon.map, true));
+                addSentryBreadcrumb(lastRoom, "Edgeless room info.");
+                throw new UnexpectedStateException("Encountered a room without edges.");
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
