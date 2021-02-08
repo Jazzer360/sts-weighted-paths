@@ -122,6 +122,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
         });
         Sentry.setExtra("loaded-mods",
                 Arrays.stream(Loader.MODINFOS).map(modInfo -> modInfo.Name).collect(Collectors.toList()).toString());
+        Sentry.startSession();
     }
 
     @Override
