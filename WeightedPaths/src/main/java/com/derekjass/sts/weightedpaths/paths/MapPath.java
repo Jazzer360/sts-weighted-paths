@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPath> {
 
@@ -71,15 +72,17 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
 
     private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
         List<MapPath> newPaths = new LinkedList<>();
-        for (MapPath path : paths) {
+        ListIterator<MapPath> iter = paths.listIterator();
+        while (iter.hasNext()) {
+            MapPath path = iter.next();
             MapRoomNode lastRoom = path.peekLast();
             if (lastRoom == null) {
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
-            } else if (lastRoom.y == 13) {
+            } else if (lastRoom.y == AbstractDungeon.MAP_HEIGHT - 2) {
                 return;
-            } else if (lastRoom.getEdges().isEmpty()) {
-                logger.error("Encountered a room without edges.");
-                throw new UnexpectedStateException("Encountered a room without edges.");
+            } else if (!lastRoom.hasEdges()) {
+                iter.remove();
+                Sentry.captureMessage("Encountered a room with no edges.");
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
