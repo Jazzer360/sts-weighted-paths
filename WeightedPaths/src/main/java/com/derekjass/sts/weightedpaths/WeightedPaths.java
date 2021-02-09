@@ -9,6 +9,7 @@ import com.derekjass.sts.weightedpaths.ui.config.Config;
 import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.megacrit.cardcrawl.core.STSSentry;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
@@ -30,6 +31,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
     private static List<MapPath> paths = new ArrayList<>();
+    private static final String machineId = STSSentry.getAnonymizedMachineName();
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
     public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
@@ -106,7 +108,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
             options.setEnableExternalConfiguration(true);
             options.addInAppInclude("com.derekjass.sts.weightedpaths");
             options.setBeforeSend((event, hint) -> {
-                event.setServerName(null);
+                event.setServerName(machineId);
                 boolean sendToSentry = true;
                 if (event.getThrowable() != null) {
                     sendToSentry = false;
@@ -122,6 +124,7 @@ public class WeightedPaths implements PostInitializeSubscriber {
         });
         Sentry.setExtra("loaded-mods",
                 Arrays.stream(Loader.MODINFOS).map(modInfo -> modInfo.Name).collect(Collectors.toList()).toString());
+        Sentry.startSession();
     }
 
     @Override

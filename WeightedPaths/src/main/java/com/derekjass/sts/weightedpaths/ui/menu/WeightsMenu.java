@@ -6,6 +6,7 @@ import basemod.interfaces.RenderSubscriber;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.derekjass.sts.weightedpaths.ui.Renderable;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
@@ -66,7 +67,7 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
 
     @Override
     public void receiveRender(SpriteBatch sb) {
-        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP) {
+        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP && !WeightedPaths.roomValues.isEmpty()) {
             sb.setColor(Color.WHITE);
             render(sb);
         }
@@ -74,7 +75,7 @@ public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber {
 
     @Override
     public void receivePostUpdate() {
-        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP) {
+        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP && !WeightedPaths.roomValues.isEmpty()) {
             update();
         }
     }

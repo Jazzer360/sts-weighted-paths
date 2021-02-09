@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,21 +66,25 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             return paths;
         }
         generateRemaining(paths);
-        addSentryBreadcrumb("Total paths found: " + paths.size());
+        logger.info("Total paths found: " + paths.size());
+        Sentry.clearBreadcrumbs();
         return paths;
     }
 
     private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
         List<MapPath> newPaths = new LinkedList<>();
-        for (MapPath path : paths) {
+        Iterator<MapPath> iter = paths.iterator();
+        while (iter.hasNext()) {
+            MapPath path = iter.next();
             MapRoomNode lastRoom = path.peekLast();
             if (lastRoom == null) {
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
-            } else if (lastRoom.y == 13) {
-                return;
-            } else if (lastRoom.getEdges().isEmpty()) {
-                logger.error("Encountered a room without edges.");
-                throw new UnexpectedStateException("Encountered a room without edges.");
+            } else if (lastRoom.y == AbstractDungeon.MAP_HEIGHT - 2) {
+                continue;
+            } else if (!lastRoom.hasEdges()) {
+                addSentryBreadcrumb("Removing path. Last room in path has no edges.");
+                iter.remove();
+                continue;
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
@@ -89,7 +94,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             path.addRoomToPath(lastRoom.getEdges().get(0));
         }
         paths.addAll(newPaths);
-        generateRemaining(paths);
+        //noinspection ConstantConditions
+        if (paths.stream().anyMatch(path -> path.peekLast().y < AbstractDungeon.MAP_HEIGHT - 2)) {
+            generateRemaining(paths);
+        }
     }
 
     private static void addSentryBreadcrumb(String note) {
@@ -127,6 +135,10 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
                 estimatedGold += (hasMaw ? 12.0 : 0.0);
             }
             switch (roomSymbol) {
+                case "T":
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += 18.4;
+                    }
                 case "M":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     if (!RelicTracker.hasEcto) {
