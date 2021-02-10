@@ -137,10 +137,6 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                 estimatedGold += (hasMaw ? 12.0 : 0.0);
             }
             switch (roomSymbol) {
-                case "T":
-                    if (!RelicTracker.hasEcto) {
-                        estimatedGold += 18.4;
-                    }
                 case "M":
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     if (!RelicTracker.hasEcto) {
@@ -172,6 +168,11 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                             / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;
                     hasMaw = false;
+                    break;
+                case "T":
+                    if (!RelicTracker.hasEcto) {
+                        estimatedGold += 18.4;
+                    }
                     break;
             }
         }
