@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SpireInitializer
 public class WeightedPaths implements PostInitializeSubscriber {
@@ -69,8 +70,10 @@ public class WeightedPaths implements PostInitializeSubscriber {
             if (AbstractDungeon.getCurrMapNode() == null) {
                 Sentry.captureMessage("In act 3 and current map node is null.");
             } else if (!AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
-                List<MapPath> filterPaths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
-                paths = filterPaths.isEmpty() ? paths : filterPaths;
+                Stream<MapPath> pathStream = paths.stream().filter(MapPath::hasEmerald);
+                if (pathStream.findAny().isPresent()) {
+                    paths = pathStream.collect(Collectors.toList());
+                }
             }
         }
         for (MapPath path : paths) {
