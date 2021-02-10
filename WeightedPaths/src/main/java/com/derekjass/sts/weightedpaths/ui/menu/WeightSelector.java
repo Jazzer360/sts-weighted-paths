@@ -1,30 +1,36 @@
 package com.derekjass.sts.weightedpaths.ui.menu;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Texture;
-import com.derekjass.sts.weightedpaths.WeightedPaths;
-import com.derekjass.sts.weightedpaths.ui.ClickableUIElement;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.derekjass.sts.weightedpaths.ui.Renderable;
 
-public class WeightSelector extends ClickableUIElement {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final boolean increase;
-    private final String nodeType;
+class WeightSelector implements Renderable {
 
-    WeightSelector(Texture texture, float x, float y, String nodeType, boolean increase) {
-        super(texture, x, y);
-        this.increase = increase;
-        this.nodeType = nodeType;
+    private static final float arrowXSpacing = 74.0f;
+
+    private final List<Renderable> renderables = new ArrayList<>();
+
+    WeightSelector(@SuppressWarnings("SameParameterValue") float x, float y, String label, String nodeType) {
+        float weightX = x + WeightArrow.width + ((arrowXSpacing - WeightArrow.width) / 2);
+        renderables.add(new LabelText(x, y, label));
+        renderables.add(new WeightArrow(WeightArrow.Direction.LEFT, x, y, nodeType));
+        renderables.add(new WeightText(weightX, y, nodeType));
+        renderables.add(new WeightArrow(WeightArrow.Direction.RIGHT, x + arrowXSpacing, y, nodeType));
     }
 
     @Override
-    protected void onClick() {
-        double inc = isShiftPressed() ? 1.0 : 0.1;
-        WeightedPaths.weights.put(nodeType, WeightedPaths.weights.get(nodeType) + (increase ? inc : -inc));
-        WeightedPaths.refreshPathValues();
+    public void render(SpriteBatch sb) {
+        for (Renderable r : renderables) {
+            r.render(sb);
+        }
     }
 
-    public static boolean isShiftPressed() {
-        return Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+    @Override
+    public void update() {
+        for (Renderable r : renderables) {
+            r.update();
+        }
     }
 }

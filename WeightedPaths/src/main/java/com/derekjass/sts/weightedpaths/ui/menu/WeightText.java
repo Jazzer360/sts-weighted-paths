@@ -5,7 +5,7 @@ import com.derekjass.sts.weightedpaths.WeightedPaths;
 import com.derekjass.sts.weightedpaths.ui.Renderable;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 
-public class WeightText implements Renderable {
+class WeightText implements Renderable {
 
     private final String nodeType;
     private final float x, y;

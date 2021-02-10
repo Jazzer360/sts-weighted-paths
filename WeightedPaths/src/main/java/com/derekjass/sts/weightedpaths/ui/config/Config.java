@@ -16,8 +16,6 @@ public class Config {
     private static final String COLORED_WEIGHTS_KEY = "coloredWeights";
     private static final String FORCE_EMERALD_KEY = "forceEmerald";
     private static SpireConfig config;
-    private static boolean useColoredWeights;
-    private static boolean forceEmerald;
 
     public static void initialize() {
         Properties defaults = new Properties();
@@ -29,16 +27,13 @@ public class Config {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        useColoredWeights = config.getBool(COLORED_WEIGHTS_KEY);
-        forceEmerald = config.getBool(FORCE_EMERALD_KEY);
         ModPanel panel = new ModPanel();
         ModLabeledToggleButton toggleColor = new ModLabeledToggleButton(
                 "Show colored background on weight values.",
                 400.0f, 700.0f, Settings.CREAM_COLOR, FontHelper.charDescFont,
-                useColoredWeights, panel,
+                config.getBool(COLORED_WEIGHTS_KEY), panel,
                 (label) -> {},
                 (button) -> {
-                    useColoredWeights = button.enabled;
                     config.setBool(COLORED_WEIGHTS_KEY, button.enabled);
                     saveConfig();
                 });
@@ -46,10 +41,9 @@ public class Config {
         ModLabeledToggleButton toggleEmerald = new ModLabeledToggleButton(
                 "Force pathing through emerald key by act 3.",
                 400.0f, 650.0f, Settings.CREAM_COLOR, FontHelper.charDescFont,
-                forceEmerald, panel,
+                config.getBool(FORCE_EMERALD_KEY), panel,
                 (label) -> {},
                 (button) -> {
-                    forceEmerald = button.enabled;
                     config.setBool(FORCE_EMERALD_KEY, button.enabled);
                     saveConfig();
                 });
@@ -61,11 +55,11 @@ public class Config {
     }
 
     public static boolean useColoredWeights() {
-        return useColoredWeights;
+        return config.getBool(COLORED_WEIGHTS_KEY);
     }
 
     public static boolean forceEmerald() {
-        return forceEmerald;
+        return config.getBool(FORCE_EMERALD_KEY);
     }
 
     private static void saveConfig() {
