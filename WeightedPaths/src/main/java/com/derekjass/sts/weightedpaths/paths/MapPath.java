@@ -16,17 +16,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
-public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPath> {
+public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPath> {
 
     private static final Logger logger = LogManager.getLogger(MapPath.class.getName());
 
     private double value = 0.0f;
 
     private static List<MapPath> generateStarterPaths() {
-        List<MapPath> paths = new LinkedList<>();
+        List<MapPath> paths = new ArrayList<>();
         List<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
         for (MapRoomNode room : firstFloor) {
             if (!room.hasEdges()) {
@@ -58,7 +57,7 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             }
             for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
                 MapPath path = new MapPath();
-                path.addRoomToPath(edge);
+                path.add(edge);
                 paths.add(path);
             }
         } else {
@@ -72,11 +71,11 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
     }
 
     private static void generateRemaining(List<MapPath> paths) throws UnexpectedStateException {
-        List<MapPath> newPaths = new LinkedList<>();
+        List<MapPath> newPaths = new ArrayList<>();
         Iterator<MapPath> iter = paths.iterator();
         while (iter.hasNext()) {
             MapPath path = iter.next();
-            MapRoomNode lastRoom = path.peekLast();
+            MapRoomNode lastRoom = path.last();
             if (lastRoom == null) {
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
             } else if (lastRoom.y == AbstractDungeon.MAP_HEIGHT - 2) {
@@ -88,14 +87,13 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
             }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
-                newPath.addRoomToPath(lastRoom.getEdges().get(i));
+                newPath.add(lastRoom.getEdges().get(i));
                 newPaths.add(newPath);
             }
-            path.addRoomToPath(lastRoom.getEdges().get(0));
+            path.add(lastRoom.getEdges().get(0));
         }
         paths.addAll(newPaths);
-        //noinspection ConstantConditions
-        if (paths.stream().anyMatch(path -> path.peekLast().y < AbstractDungeon.MAP_HEIGHT - 2)) {
+        if (paths.stream().anyMatch(path -> path.last().y < AbstractDungeon.MAP_HEIGHT - 2)) {
             generateRemaining(paths);
         }
     }
@@ -120,9 +118,13 @@ public class MapPath extends LinkedList<MapRoomNode> implements Comparable<MapPa
         Sentry.addBreadcrumb(crumb);
     }
 
-    private void addRoomToPath(MapEdge edge) {
+    private void add(MapEdge edge) {
         MapRoomNode room = CardCrawlGame.dungeon.getMap().get(edge.dstY).get(edge.dstX);
         add(room);
+    }
+
+    private MapRoomNode last() {
+        return get(size() - 1);
     }
 
     public void valuate() {

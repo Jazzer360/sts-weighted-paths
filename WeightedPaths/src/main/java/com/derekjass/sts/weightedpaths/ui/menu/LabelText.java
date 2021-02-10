@@ -17,6 +17,7 @@ class LabelText implements Renderable {
 
     @Override
     public void render(SpriteBatch sb) {
-        FontHelper.renderFontRightAligned(sb, FontHelper.tipBodyFont, label, x, y + WeightArrow.width / 2, WeightsMenu.FONT_COLOR);
+        FontHelper.renderFontRightAligned(sb, FontHelper.tipBodyFont, label,
+                x, y + WeightArrow.height / 2, WeightsMenu.FONT_COLOR);
     }
 }

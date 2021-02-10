@@ -21,6 +21,7 @@ class WeightArrow extends ClickableUIElement {
     }
 
     static final float width = Direction.LEFT.texture.getWidth();
+    static final float height = Direction.RIGHT.texture.getHeight();
 
     private final boolean increase;
     private final String nodeType;

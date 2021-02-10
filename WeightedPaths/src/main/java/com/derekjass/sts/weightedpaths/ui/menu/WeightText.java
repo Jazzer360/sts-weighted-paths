@@ -18,6 +18,7 @@ class WeightText implements Renderable {
 
     public void render(SpriteBatch sb) {
         String weight = String.format("%.1f", WeightedPaths.weights.get(nodeType));
-        FontHelper.renderFontCentered(sb, FontHelper.tipBodyFont, weight, x, y + 24, WeightsMenu.FONT_COLOR);
+        FontHelper.renderFontCentered(sb, FontHelper.tipBodyFont, weight,
+                x, y + WeightArrow.height / 2, WeightsMenu.FONT_COLOR);
     }
 }
