@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPath> {
 
@@ -24,18 +25,17 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
 
     private double value = 0.0f;
 
-    private static List<MapPath> generateStarterPaths() {
-        List<MapPath> paths = new ArrayList<>();
+    private MapPath(MapRoomNode room) {
+        add(room);
+    }
+
+    private MapPath(MapEdge edge) {
+        add(edge);
+    }
+
+    private static List<MapPath> starterPaths() {
         List<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
-        for (MapRoomNode room : firstFloor) {
-            if (!room.hasEdges()) {
-                continue;
-            }
-            MapPath path = new MapPath();
-            path.add(room);
-            paths.add(path);
-        }
-        return paths;
+        return firstFloor.stream().filter(MapRoomNode::hasEdges).map(MapPath::new).collect(Collectors.toList());
     }
 
     public static List<MapPath> generateAll() throws UnexpectedStateException {
@@ -47,7 +47,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             return paths;
         } else if (!AbstractDungeon.firstRoomChosen) {
             addSentryBreadcrumb("Act is fresh, so generate starter paths.");
-            paths = generateStarterPaths();
+            paths = starterPaths();
         } else if (AbstractDungeon.getCurrMapNode() == null) {
             throw new UnexpectedStateException("AbstractDungeon current map node is null.");
         } else if (AbstractDungeon.getCurrMapNode().y < AbstractDungeon.MAP_HEIGHT - 2) {
@@ -56,9 +56,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                 throw new UnexpectedStateException("Current map node has no edges.");
             }
             for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
-                MapPath path = new MapPath();
-                path.add(edge);
-                paths.add(path);
+                paths.add(new MapPath(edge));
             }
         } else {
             addSentryBreadcrumb("Floor is not eligible for path generation.");
@@ -184,12 +182,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
     }
 
     public boolean hasEmerald() {
-        for (MapRoomNode room : this) {
-            if (room.hasEmeraldKey) {
-                return true;
-            }
-        }
-        return false;
+        return stream().anyMatch(room -> room.hasEmeraldKey);
     }
 
     @Override

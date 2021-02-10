@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SpireInitializer
 public class WeightedPaths implements PostInitializeSubscriber {
@@ -70,19 +69,15 @@ public class WeightedPaths implements PostInitializeSubscriber {
             if (AbstractDungeon.getCurrMapNode() == null) {
                 Sentry.captureMessage("In act 3 and current map node is null.");
             } else if (!AbstractDungeon.getCurrMapNode().hasEmeraldKey) {
-                Stream<MapPath> pathStream = paths.stream().filter(MapPath::hasEmerald);
-                if (pathStream.findAny().isPresent()) {
-                    paths = pathStream.collect(Collectors.toList());
+                if (paths.stream().anyMatch(MapPath::hasEmerald)) {
+                    paths = paths.stream().filter(MapPath::hasEmerald).collect(Collectors.toList());
                 }
             }
         }
         for (MapPath path : paths) {
             path.valuate();
-            for (MapRoomNode room: path) {
-                Double val = WeightedPaths.roomValues.get(room);
-                if (val == null || val < path.getValue()) {
-                    WeightedPaths.roomValues.put(room, path.getValue());
-                }
+            for (MapRoomNode room : path) {
+                roomValues.put(room, Math.max(roomValues.getOrDefault(room, 0.0), path.getValue()));
             }
         }
         maxValue = Collections.max(roomValues.values());
