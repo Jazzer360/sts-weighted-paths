@@ -14,11 +14,17 @@ public abstract class ClickableUIElement implements Renderable {
     private final float x, y;
     private final float xOffset, yOffset;
     private final int width, height;
+    private final Color color;
 
     protected ClickableUIElement(Texture texture, float x, float y) {
+        this(texture, x, y, Color.WHITE);
+    }
+
+    protected ClickableUIElement(Texture texture, float x, float y, Color color) {
         this.texture = texture;
         this.x = x;
         this.y = y;
+        this.color = color;
         width = texture.getWidth();
         height = texture.getHeight();
         xOffset = (width * HOVER_SCALE - width) / 2.0f;
@@ -30,7 +36,7 @@ public abstract class ClickableUIElement implements Renderable {
 
     @Override
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.WHITE);
+        sb.setColor(color);
         if (hb.hovered && !hb.clickStarted) {
             sb.draw(texture, x - xOffset, y - yOffset, width * HOVER_SCALE, height * HOVER_SCALE);
         } else {
