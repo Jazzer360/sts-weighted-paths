@@ -53,7 +53,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             paths = starterPaths();
         } else if (AbstractDungeon.getCurrMapNode() == null) {
             throw new UnexpectedStateException("AbstractDungeon current map node is null.");
-        } else if (AbstractDungeon.getCurrMapNode().y < AbstractDungeon.MAP_HEIGHT - 2) {
+        } else if (AbstractDungeon.getCurrMapNode().y < maxFloor()) {
             addSentryBreadcrumb("Generating from current room.");
             if (!AbstractDungeon.getCurrMapNode().hasEdges()) {
                 throw new UnexpectedStateException("Current map node has no edges.");
@@ -79,7 +79,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             MapRoomNode lastRoom = path.last();
             if (lastRoom == null) {
                 throw new UnexpectedStateException("During path generation, last node in path returned null.");
-            } else if (lastRoom.y == AbstractDungeon.MAP_HEIGHT - 2) {
+            } else if (lastRoom.y == maxFloor()) {
                 continue;
             } else if (!lastRoom.hasEdges()) {
                 addSentryBreadcrumb("Removing path. Last room in path has no edges.");
@@ -94,9 +94,13 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             path.add(lastRoom.getEdges().get(0));
         }
         paths.addAll(newPaths);
-        if (paths.stream().anyMatch(path -> path.last().y < AbstractDungeon.MAP_HEIGHT - 2)) {
+        if (paths.stream().anyMatch(path -> path.last().y < maxFloor())) {
             generateRemaining(paths);
         }
+    }
+
+    private static int maxFloor() {
+        return AbstractDungeon.MAP_HEIGHT - 2;
     }
 
     private static void addSentryBreadcrumb(String note) {
