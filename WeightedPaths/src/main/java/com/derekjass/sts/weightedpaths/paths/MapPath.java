@@ -35,7 +35,10 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
 
     private static List<MapPath> starterPaths() {
         List<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
-        return firstFloor.stream().filter(MapRoomNode::hasEdges).map(MapPath::new).collect(Collectors.toList());
+        return firstFloor.stream()
+                .filter(MapRoomNode::hasEdges)
+                .map(MapPath::new)
+                .collect(Collectors.toList());
     }
 
     public static List<MapPath> generateAll() throws UnexpectedStateException {
@@ -157,11 +160,8 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     break;
                 case "$":
-                    if (WeightedPaths.storeGold.containsKey(room)) {
-                        WeightedPaths.storeGold.put(room, Math.max(estimatedGold, WeightedPaths.storeGold.get(room)));
-                    } else {
-                        WeightedPaths.storeGold.put(room, estimatedGold);
-                    }
+                    WeightedPaths.storeGold.put(room,
+                            Math.max(WeightedPaths.storeGold.getOrDefault(room, 0.0), estimatedGold));
                     summedValue += estimatedGold / 100 / (RelicTracker.hasMembership ? 0.5 : 1.0)
                             / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;
