@@ -9,26 +9,26 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 
 class WeightArrow extends ClickableUIElement {
 
-    enum Direction {
-        LEFT(ImageMaster.CF_LEFT_ARROW),
-        RIGHT(ImageMaster.CF_RIGHT_ARROW);
+    enum Action {
+        DECREASE(ImageMaster.CF_LEFT_ARROW),
+        INCREASE(ImageMaster.CF_RIGHT_ARROW);
 
         private final Texture texture;
 
-        Direction(Texture texture) {
+        Action(Texture texture) {
             this.texture = texture;
         }
     }
 
-    static final float width = Direction.LEFT.texture.getWidth();
-    static final float height = Direction.RIGHT.texture.getHeight();
+    static final float width = Action.DECREASE.texture.getWidth();
+    static final float height = Action.DECREASE.texture.getHeight();
 
     private final boolean increase;
     private final String nodeType;
 
-    WeightArrow(Direction dir, float x, float y, String nodeType) {
+    WeightArrow(Action dir, float x, float y, String nodeType) {
         super(dir.texture, x, y);
-        increase = dir == Direction.RIGHT;
+        increase = dir == Action.INCREASE;
         this.nodeType = nodeType;
     }
 

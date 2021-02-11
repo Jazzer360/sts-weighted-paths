@@ -1,5 +1,6 @@
 package com.derekjass.sts.weightedpaths.ui;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.helpers.Hitbox;
@@ -29,6 +30,7 @@ public abstract class ClickableUIElement implements Renderable {
 
     @Override
     public void render(SpriteBatch sb) {
+        sb.setColor(Color.WHITE);
         if (hb.hovered && !hb.clickStarted) {
             sb.draw(texture, x - xOffset, y - yOffset, width * HOVER_SCALE, height * HOVER_SCALE);
         } else {

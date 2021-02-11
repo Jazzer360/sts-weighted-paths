@@ -9,7 +9,7 @@ class LabelText implements Renderable {
     private final String label;
     private final float x, y;
 
-    LabelText(@SuppressWarnings("SameParameterValue") float x, float y, String label) {
+    LabelText(float x, float y, String label) {
         this.x = x;
         this.y = y;
         this.label = label;

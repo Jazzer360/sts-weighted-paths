@@ -6,65 +6,49 @@ import basemod.interfaces.RenderSubscriber;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.derekjass.sts.weightedpaths.WeightedPaths;
-import com.derekjass.sts.weightedpaths.ui.Renderable;
+import com.derekjass.sts.weightedpaths.ui.CompositeUIElement;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.Legend;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class WeightsMenu implements RenderSubscriber, PostUpdateSubscriber, Renderable {
+public class WeightsMenu extends CompositeUIElement implements RenderSubscriber, PostUpdateSubscriber {
 
     static final Color FONT_COLOR = new Color(0xD0_D0_D0_FF);
     private static final float menuX = Legend.X + 80.0f;
     private static final float menuY = 40.0f;
     private static final float ySpacing = 40.0f;
 
-    private final List<Renderable> renderables = new ArrayList<>();
-
     private WeightsMenu() {
         BaseMod.subscribe(this);
         float rowY = menuY;
-        renderables.add(new WeightSelector(menuX, rowY, "Store (per 100g):", "$"));
+        addComponent(new WeightSelector(menuX, rowY, "Store (per 100g):", "$"));
         rowY += ySpacing;
-        renderables.add(new WeightSelector(menuX, rowY, "Rest:", "R"));
+        addComponent(new WeightSelector(menuX, rowY, "Rest:", "R"));
         rowY += ySpacing;
-        renderables.add(new WeightSelector(menuX, rowY, "Unknown:", "?"));
+        addComponent(new WeightSelector(menuX, rowY, "Unknown:", "?"));
         rowY += ySpacing;
-        renderables.add(new WeightSelector(menuX, rowY, "Monsters:", "M"));
+        addComponent(new WeightSelector(menuX, rowY, "Monsters:", "M"));
         rowY += ySpacing;
-        renderables.add(new WeightSelector(menuX, rowY, "Elites:", "E"));
+        addComponent(new WeightSelector(menuX, rowY, "Elites:", "E"));
     }
 
     public static void initialize() {
         new WeightsMenu();
     }
 
-    @Override
-    public void render(SpriteBatch sb) {
-        for (Renderable r : renderables) {
-            r.render(sb);
-        }
-    }
-
-    @Override
-    public void update() {
-        for (Renderable r : renderables) {
-            r.update();
-        }
+    private boolean shouldRender() {
+        return AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP && !WeightedPaths.roomValues.isEmpty();
     }
 
     @Override
     public void receiveRender(SpriteBatch sb) {
-        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP && !WeightedPaths.roomValues.isEmpty()) {
-            sb.setColor(Color.WHITE);
+        if (shouldRender()) {
             render(sb);
         }
     }
 
     @Override
     public void receivePostUpdate() {
-        if (AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP && !WeightedPaths.roomValues.isEmpty()) {
+        if (shouldRender()) {
             update();
         }
     }
