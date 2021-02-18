@@ -9,7 +9,6 @@ import com.megacrit.cardcrawl.dungeons.TheEnding;
 import com.megacrit.cardcrawl.helpers.SeedHelper;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
-import com.megacrit.cardcrawl.relics.AbstractRelic;
 import io.sentry.Breadcrumb;
 import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +53,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             addSentryBreadcrumb("Act is fresh, so generate starter paths.");
             paths = starterPaths(0);
             for (MapPath path : paths) {
-                path.wingCharges = wingedCharges();
+                path.wingCharges = RelicTracker.wingCharges;
             }
         } else if (currRoom() == null) {
             throw new UnexpectedStateException("AbstractDungeon current map node is null.");
@@ -63,7 +62,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             if (!currRoom().hasEdges()) {
                 throw new UnexpectedStateException("Current map node has no edges.");
             }
-            int wingCharges = wingedCharges();
+            int wingCharges = RelicTracker.wingCharges;
             if (wingCharges > 0) {
                 paths = starterPaths(currRoom().y + 1);
                 for (MapPath path : paths) {
@@ -124,15 +123,6 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
         if (paths.stream().anyMatch(path -> path.last().y < maxFloor())) {
             generateRemaining(paths);
         }
-    }
-
-    private static int wingedCharges() {
-        for (AbstractRelic relic : AbstractDungeon.player.relics) {
-            if (relic.relicId.equals("WingedGreaves")) {
-                return relic.counter;
-            }
-        }
-        return 0;
     }
 
     private static ArrayList<MapRoomNode> floor(int floorY) {
@@ -208,8 +198,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                     summedValue += WeightedPaths.weights.get(roomSymbol);
                     break;
                 case "$":
-                    WeightedPaths.storeGold.put(room,
-                            Math.max(WeightedPaths.storeGold.getOrDefault(room, 0.0), estimatedGold));
+                    WeightedPaths.storeGold.merge(room, estimatedGold, Math::max);
                     summedValue += estimatedGold / 100 / (RelicTracker.hasMembership ? 0.5 : 1.0)
                             / (RelicTracker.hasCourier ? 0.8 : 1.0) * WeightedPaths.weights.get(roomSymbol);
                     estimatedGold = 0.0;

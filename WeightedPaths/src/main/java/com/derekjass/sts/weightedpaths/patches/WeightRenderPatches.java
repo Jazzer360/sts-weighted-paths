@@ -23,6 +23,9 @@ public class WeightRenderPatches {
     private static BitmapFont font;
 
     private static void drawNodeValue(MapRoomNode room, SpriteBatch sb) {
+        if (WeightedPaths.isCalculating()) {
+            return;
+        }
         if (WeightedPaths.roomValues.containsKey(room)) {
             double value = WeightedPaths.roomValues.get(room);
             if (Config.useColoredWeights()) {

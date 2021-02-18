@@ -11,6 +11,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.MawBank;
+import com.megacrit.cardcrawl.relics.WingBoots;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,11 +28,24 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
         }
     }
 
+    @SpirePatch(clz = WingBoots.class, method = "setCounter")
+    public static class PreBootsSetCounterPatch {
+
+        @SpirePrefixPatch
+        public static void onBootSetCounter(WingBoots instance, int counter) {
+            wingCharges = counter;
+        }
+    }
+
     @SpirePatch(clz = AbstractPlayer.class, method = "loseRelic")
     public static class PostLoseRelicPatch {
 
         @SpirePostfixPatch
         public static void onLoseRelic(AbstractPlayer instance, String id) {
+            if (id.equals("WingedGreaves") && CardCrawlGame.dungeon != null) {
+                wingCharges = 0;
+                WeightedPaths.regeneratePaths();
+            }
             updateRelicsAndRefreshPathValues(id, false);
         }
     }
@@ -40,6 +54,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
     public static boolean hasIdol = false, hasFace = false, hasMaw = false, hasMembership = false, hasCourier = false,
             hasEcto = false;
+    public static int wingCharges = 0;
 
     private RelicTracker() {
         BaseMod.subscribe(this);
@@ -88,6 +103,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
     @Override
     public void receiveRelicGet(AbstractRelic relic) {
         if (relic.relicId.equals("WingedGreaves") && CardCrawlGame.dungeon != null) {
+            wingCharges = relic.counter;
             WeightedPaths.regeneratePaths();
         }
         updateRelicsAndRefreshPathValues(relic.relicId, true);
@@ -96,6 +112,7 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
     @Override
     public void receivePreStartGame() {
         hasIdol = hasFace = hasMaw = hasMembership = hasCourier = hasEcto = false;
+        wingCharges = 0;
         logger.info("Cleared tracked relics.");
     }
 }

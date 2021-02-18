@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @SpireInitializer
@@ -32,11 +34,13 @@ public class WeightedPaths implements PostInitializeSubscriber {
 
     private static List<MapPath> paths = new ArrayList<>();
     private static final String machineId = STSSentry.getAnonymizedMachineName();
+    private static Thread regenThread = new Thread(WeightedPaths::performRegeneration);
+    private static Thread refreshThread = new Thread(WeightedPaths::performRefresh);
     public static final Map<String, Double> weights = new HashMap<>();
-    public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
-    public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
-    public static double maxValue;
-    public static double minValue;
+    public static final ConcurrentMap<MapRoomNode, Double> roomValues = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<MapRoomNode, Double> storeGold = new ConcurrentHashMap<>();
+    public static volatile double maxValue;
+    public static volatile double minValue;
 
     private WeightedPaths() {
         BaseMod.subscribe(this);
@@ -47,6 +51,17 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void regeneratePaths() {
+        regenThread.interrupt();
+        try {
+            regenThread.join();
+            regenThread = new Thread(WeightedPaths::performRegeneration);
+            regenThread.start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void performRegeneration() {
         try {
             paths = MapPath.generateAll();
         } catch (UnexpectedStateException e) {
@@ -54,10 +69,20 @@ public class WeightedPaths implements PostInitializeSubscriber {
             paths = new ArrayList<>();
         }
         refreshPathValues();
-        logTopPaths();
     }
 
     public static void refreshPathValues() {
+        refreshThread.interrupt();
+        try {
+            refreshThread.join();
+            refreshThread = new Thread(WeightedPaths::performRefresh);
+            refreshThread.start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void performRefresh() {
         roomValues.clear();
         storeGold.clear();
         if (paths.size() == 0) {
@@ -74,22 +99,21 @@ public class WeightedPaths implements PostInitializeSubscriber {
                 }
             }
         }
+        long start = System.currentTimeMillis();
         for (MapPath path : paths) {
+            if (Thread.interrupted()) {
+                return;
+            }
             path.valuate();
             for (MapRoomNode room : path) {
-                roomValues.put(room, Math.max(roomValues.getOrDefault(room, 0.0), path.getValue()));
+                roomValues.merge(room, path.getValue(), Math::max);
             }
         }
+        logger.info(String.format("Path evaluation took %dms", System.currentTimeMillis() - start));
         maxValue = Collections.max(roomValues.values());
         minValue = Collections.min(roomValues.values());
         paths.sort(Collections.reverseOrder());
         logger.info("Paths evaluated and sorted.");
-    }
-
-    private static void logTopPaths() {
-        for (int i = 0; i < Math.min(5, WeightedPaths.paths.size()); i++) {
-            logger.info(WeightedPaths.paths.get(i));
-        }
     }
 
     private static void initializeWeights() {
@@ -123,6 +147,10 @@ public class WeightedPaths implements PostInitializeSubscriber {
         Sentry.setExtra("loaded-mods",
                 Arrays.stream(Loader.MODINFOS).map(modInfo -> modInfo.Name).collect(Collectors.toList()).toString());
         Sentry.startSession();
+    }
+
+    public static boolean isCalculating() {
+        return regenThread.isAlive() || refreshThread.isAlive();
     }
 
     @Override
