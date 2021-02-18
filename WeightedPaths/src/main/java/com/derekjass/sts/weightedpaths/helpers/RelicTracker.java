@@ -8,6 +8,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.relics.MawBank;
 import org.apache.logging.log4j.LogManager;
@@ -86,6 +87,9 @@ public class RelicTracker implements RelicGetSubscriber, PreStartGameSubscriber 
 
     @Override
     public void receiveRelicGet(AbstractRelic relic) {
+        if (relic.relicId.equals("WingedGreaves") && CardCrawlGame.dungeon != null) {
+            WeightedPaths.regeneratePaths();
+        }
         updateRelicsAndRefreshPathValues(relic.relicId, true);
     }
 

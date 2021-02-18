@@ -9,6 +9,7 @@ import com.megacrit.cardcrawl.dungeons.TheEnding;
 import com.megacrit.cardcrawl.helpers.SeedHelper;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
 import io.sentry.Breadcrumb;
 import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
@@ -24,6 +25,7 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
     private static final Logger logger = LogManager.getLogger(MapPath.class.getName());
 
     private double value = 0.0f;
+    private int wingCharges = 0;
 
     private MapPath(MapRoomNode room) {
         add(room);
@@ -33,8 +35,8 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
         add(edge);
     }
 
-    private static List<MapPath> starterPaths() {
-        List<MapRoomNode> firstFloor = CardCrawlGame.dungeon.getMap().get(0);
+    private static List<MapPath> starterPaths(int floorY) {
+        List<MapRoomNode> firstFloor = floor(floorY);
         return firstFloor.stream()
                 .filter(MapRoomNode::hasEdges)
                 .map(MapPath::new)
@@ -50,16 +52,31 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
             return paths;
         } else if (!AbstractDungeon.firstRoomChosen) {
             addSentryBreadcrumb("Act is fresh, so generate starter paths.");
-            paths = starterPaths();
-        } else if (AbstractDungeon.getCurrMapNode() == null) {
+            paths = starterPaths(0);
+            for (MapPath path : paths) {
+                path.wingCharges = wingedCharges();
+            }
+        } else if (currRoom() == null) {
             throw new UnexpectedStateException("AbstractDungeon current map node is null.");
-        } else if (AbstractDungeon.getCurrMapNode().y < maxFloor()) {
+        } else if (currRoom().y < maxFloor()) {
             addSentryBreadcrumb("Generating from current room.");
-            if (!AbstractDungeon.getCurrMapNode().hasEdges()) {
+            if (!currRoom().hasEdges()) {
                 throw new UnexpectedStateException("Current map node has no edges.");
             }
-            for (MapEdge edge : AbstractDungeon.getCurrMapNode().getEdges()) {
-                paths.add(new MapPath(edge));
+            int wingCharges = wingedCharges();
+            if (wingCharges > 0) {
+                paths = starterPaths(currRoom().y + 1);
+                for (MapPath path : paths) {
+                    if (!path.last().isConnectedTo(currRoom())) {
+                        path.wingCharges = wingCharges - 1;
+                    } else {
+                        path.wingCharges = wingCharges;
+                    }
+                }
+            } else {
+                for (MapEdge edge : currRoom().getEdges()) {
+                    paths.add(new MapPath(edge));
+                }
             }
         } else {
             addSentryBreadcrumb("Floor is not eligible for path generation.");
@@ -86,6 +103,16 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
                 iter.remove();
                 continue;
             }
+            if (path.wingCharges > 0) {
+                for (MapRoomNode room : floor(lastRoom.y + 1)) {
+                    if (!room.isConnectedTo(lastRoom) && room.hasEdges()) {
+                        MapPath newPath = (MapPath) path.clone();
+                        newPath.add(room);
+                        newPath.wingCharges--;
+                        newPaths.add(newPath);
+                    }
+                }
+            }
             for (int i = 1; i < lastRoom.getEdges().size(); i++) {
                 MapPath newPath = (MapPath) path.clone();
                 newPath.add(lastRoom.getEdges().get(i));
@@ -97,6 +124,23 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
         if (paths.stream().anyMatch(path -> path.last().y < maxFloor())) {
             generateRemaining(paths);
         }
+    }
+
+    private static int wingedCharges() {
+        for (AbstractRelic relic : AbstractDungeon.player.relics) {
+            if (relic.relicId.equals("WingedGreaves")) {
+                return relic.counter;
+            }
+        }
+        return 0;
+    }
+
+    private static ArrayList<MapRoomNode> floor(int floorY) {
+        return CardCrawlGame.dungeon.getMap().get(floorY);
+    }
+
+    private static MapRoomNode currRoom() {
+        return AbstractDungeon.getCurrMapNode();
     }
 
     private static int maxFloor() {
@@ -116,15 +160,15 @@ public class MapPath extends ArrayList<MapRoomNode> implements Comparable<MapPat
         crumb.setCategory("map-generation");
         crumb.setData("floor", String.valueOf(AbstractDungeon.floorNum));
         crumb.setData("act", CardCrawlGame.dungeon.getClass().getSimpleName());
-        crumb.setData("room", AbstractDungeon.getCurrMapNode() == null ?
-                "NULL" : AbstractDungeon.getCurrMapNode().room.getClass().getSimpleName());
+        crumb.setData("room", currRoom() == null ?
+                "NULL" : currRoom().room.getClass().getSimpleName());
         crumb.setData("seed", SeedHelper.getString(Settings.seed));
         crumb.setData("character", AbstractDungeon.player.getClass().getSimpleName());
         Sentry.addBreadcrumb(crumb);
     }
 
     private void add(MapEdge edge) {
-        MapRoomNode room = CardCrawlGame.dungeon.getMap().get(edge.dstY).get(edge.dstX);
+        MapRoomNode room = floor(edge.dstY).get(edge.dstX);
         add(room);
     }
 
