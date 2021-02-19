@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 class RefreshValuesThread extends Thread {
 
-    private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
+    private static final Logger logger = LogManager.getLogger(RefreshValuesThread.class.getName());
 
     private boolean notified = false;
 
@@ -23,17 +23,23 @@ class RefreshValuesThread extends Thread {
 
     @Override
     public synchronized void run() {
+        //noinspection InfiniteLoopStatement
         while (true) {
             while (!notified) {
                 try {
                     wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException ignored) {}
             }
             notified = false;
+            refreshValues();
+        }
+    }
+
+    private void refreshValues() {
+        try {
             WeightedPaths.roomValues.clear();
             WeightedPaths.storeGold.clear();
+            WeightedPaths.pathsLock.lock();
             if (WeightedPaths.paths.size() == 0) {
                 logger.info("No paths to evaluate.");
                 return;
@@ -52,14 +58,18 @@ class RefreshValuesThread extends Thread {
             long start = System.currentTimeMillis();
             for (MapPath path : WeightedPaths.paths) {
                 if (Thread.interrupted()) {
-                    break;
+                    logger.info("Refresh values thread interrupted.");
+                    return;
                 }
                 path.valuate();
                 for (MapRoomNode room : path) {
                     WeightedPaths.roomValues.merge(room, path.getValue(), Math::max);
                 }
             }
-            logger.info(String.format("Path evaluation took %dms", System.currentTimeMillis() - start));
+            logger.info(String.format("Evaluated %d paths in %dms", WeightedPaths.paths.size(),
+                    System.currentTimeMillis() - start));
+        } finally {
+            WeightedPaths.pathsLock.unlock();
         }
     }
 
@@ -69,7 +79,9 @@ class RefreshValuesThread extends Thread {
     }
 
     void restart() {
-        interrupt();
+        if (this.getState() != State.WAITING) {
+            interrupt();
+        }
         wake();
     }
 }

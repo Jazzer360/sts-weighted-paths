@@ -19,15 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @SpireInitializer
 public class WeightedPaths implements PostInitializeSubscriber {
 
     static List<MapPath> paths = new ArrayList<>();
+    static final ReentrantLock pathsLock = new ReentrantLock();
     private static final String machineId = STSSentry.getAnonymizedMachineName();
     private static final GeneratePathsThread regenThread = new GeneratePathsThread();
-    private static final RefreshValuesThread refreshThread = new RefreshValuesThread();
+    private static final RefreshValuesThread valueThread = new RefreshValuesThread();
     public static final Map<String, Double> weights = new HashMap<>();
     public static final ConcurrentMap<MapRoomNode, Double> roomValues = new ConcurrentHashMap<>();
     public static final ConcurrentMap<MapRoomNode, Double> storeGold = new ConcurrentHashMap<>();
@@ -41,11 +43,12 @@ public class WeightedPaths implements PostInitializeSubscriber {
     }
 
     public static void regeneratePaths() {
+        valueThread.interrupt();
         regenThread.restart();
     }
 
     public static void refreshPathValues() {
-        refreshThread.restart();
+        valueThread.restart();
     }
 
     private static void initializeWeights() {
@@ -89,6 +92,6 @@ public class WeightedPaths implements PostInitializeSubscriber {
         WeightsMenu.initialize();
         Config.initialize();
         regenThread.start();
-        refreshThread.start();
+        valueThread.start();
     }
 }

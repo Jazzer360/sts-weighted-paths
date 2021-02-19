@@ -21,16 +21,17 @@ class GeneratePathsThread extends Thread {
             while (!notified) {
                 try {
                     wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException ignored) {}
             }
             notified = false;
             try {
+                WeightedPaths.pathsLock.lock();
                 WeightedPaths.paths = MapPath.generateAll();
             } catch (UnexpectedStateException e) {
                 Sentry.captureException(e);
                 WeightedPaths.paths = new ArrayList<>();
+            } finally {
+                WeightedPaths.pathsLock.unlock();
             }
             WeightedPaths.refreshPathValues();
         }
@@ -42,7 +43,9 @@ class GeneratePathsThread extends Thread {
     }
 
     void restart() {
-        interrupt();
+        if (this.getState() != State.WAITING) {
+            interrupt();
+        }
         wake();
     }
 }
