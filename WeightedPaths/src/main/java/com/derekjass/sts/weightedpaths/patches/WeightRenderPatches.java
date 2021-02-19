@@ -13,6 +13,8 @@ import com.megacrit.cardcrawl.map.MapRoomNode;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
+import java.util.Collections;
+
 public class WeightRenderPatches {
 
     private static final Color WEIGHT_COLOR = new Color(0x00_00_00_58);
@@ -23,15 +25,14 @@ public class WeightRenderPatches {
     private static BitmapFont font;
 
     private static void drawNodeValue(MapRoomNode room, SpriteBatch sb) {
-        if (WeightedPaths.isCalculating()) {
-            return;
-        }
         if (WeightedPaths.roomValues.containsKey(room)) {
             double value = WeightedPaths.roomValues.get(room);
             if (Config.useColoredWeights()) {
                 double greenAmt = 1.0;
-                if (WeightedPaths.maxValue - WeightedPaths.minValue > 0.01) {
-                    greenAmt = (value - WeightedPaths.minValue) / (WeightedPaths.maxValue - WeightedPaths.minValue);
+                double minValue = Collections.min(WeightedPaths.roomValues.values());
+                double maxValue = Collections.max(WeightedPaths.roomValues.values());
+                if (maxValue - minValue > 0.01) {
+                    greenAmt = (value - minValue) / (maxValue - minValue);
                 }
                 Color c = getColor(greenAmt);
                 sb.setColor(c);
