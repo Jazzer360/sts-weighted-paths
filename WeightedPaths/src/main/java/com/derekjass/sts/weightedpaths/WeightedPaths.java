@@ -9,7 +9,6 @@ import com.derekjass.sts.weightedpaths.ui.config.Config;
 import com.derekjass.sts.weightedpaths.ui.menu.WeightsMenu;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.megacrit.cardcrawl.core.STSSentry;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
@@ -17,6 +16,7 @@ import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,13 +31,24 @@ public class WeightedPaths implements PostInitializeSubscriber {
     private static final Logger logger = LogManager.getLogger(WeightedPaths.class.getName());
 
     private static List<MapPath> paths = new ArrayList<>();
-    private static final String machineId = STSSentry.getAnonymizedMachineName();
+    private static final String machineId = getMachineId();
+	   
     public static final Map<String, Double> weights = new HashMap<>();
     public static final Map<MapRoomNode, Double> roomValues = new HashMap<>();
     public static final Map<MapRoomNode, Double> storeGold = new HashMap<>();
     public static double maxValue;
     public static double minValue;
 
+    private static String getMachineId() {
+    	try {
+	    	return InetAddress.getLocalHost().getHostName();
+	    }
+	    catch (Exception E) {
+	        System.err.println(E.getMessage());
+	    }
+		return null;
+    }
+    
     private WeightedPaths() {
         BaseMod.subscribe(this);
     }
